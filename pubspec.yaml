@@ -1,7 +1,7 @@
 name: glue_ui
-description: "A new Flutter project."
+description: "A new Flutter project for handling dialogs and indicators"
 version: 0.0.1
-homepage: https://github.com/hassony105
+homepage: https://github.com/hassony105/glue_ui
 
 environment:
   sdk: ^3.7.2
