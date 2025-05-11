@@ -1,24 +1,55 @@
 import 'package:flutter/material.dart';
 
+/// Defines the vertical padding for a single-line SnackBar content.
 const double _singleLineVerticalPadding = 14.0;
+
+/// Defines the duration of the SnackBar's transition animation.
 const Duration _snackBarTransitionDuration = Duration(milliseconds: 250);
+
+/// Defines the default display duration for the SnackBar. Set to 1 hour to make
+/// it persistent by default unless explicitly dismissed.
 const Duration _snackBarDisplayDuration = Duration(hours: 1);
+
+/// Defines the animation curve for the height transition in Material 2.
 const Curve _snackBarHeightCurve = Curves.fastOutSlowIn;
+
+/// Defines the animation curve for the height transition in Material 3.
 const Curve _snackBarM3HeightCurve = Curves.easeInOutQuart;
 
+/// Defines the animation curve for the fade-in transition in Material 2.
 const Curve _snackBarFadeInCurve = Interval(0.4, 1.0);
+
+/// Defines the animation curve for the fade-in transition in Material 3.
 const Curve _snackBarM3FadeInCurve = Interval(
   0.4,
   0.6,
   curve: Curves.easeInCirc,
 );
+
+/// Defines the animation curve for the fade-out transition.
 const Curve _snackBarFadeOutCurve = Interval(
   0.72,
   1.0,
   curve: Curves.fastOutSlowIn,
 );
 
+/// A custom [SnackBar] widget with enhanced features.
+///
+/// This widget extends the standard [SnackBar] to provide additional
+/// functionality, such as a required `hideCallback`, options to dismiss on
+/// back button press or tap outside, and custom animation handling.
 class GlueSnackBarWidget extends SnackBar {
+  /// Creates a [GlueSnackBarWidget].
+  ///
+  /// Inherits most parameters from the standard [SnackBar] constructor.
+  ///
+  /// Requires a [hideCallback] function to be called when the SnackBar needs
+  /// to be hidden.
+  ///
+  /// [dismissOnBack] controls whether the SnackBar is dismissed when the back button is pressed.
+  ///
+  /// [dismissOnTapOutside] controls whether the SnackBar is dismissed when
+  /// the user taps outside its bounds.
   const GlueSnackBarWidget({
     required super.key,
     required super.content,
@@ -44,11 +75,20 @@ class GlueSnackBarWidget extends SnackBar {
     this.dismissOnTapOutside = false,
   });
 
+  /// A callback function to be invoked when the SnackBar needs to be hidden.
   final VoidCallback hideCallback;
 
+  /// Determines if the SnackBar should be dismissed when the device's back
+  /// button is pressed.
   final bool dismissOnBack;
+
+  /// Determines if the SnackBar should be dismissed when the user taps outside
+  /// its bounds.
   final bool dismissOnTapOutside;
 
+  /// Creates an [AnimationController] suitable for the SnackBar's transition.
+  ///
+  /// Uses the default [_snackBarTransitionDuration] if no duration is provided.
   static AnimationController createAnimationController({
     required TickerProvider vsync,
     Duration? duration,
@@ -62,6 +102,10 @@ class GlueSnackBarWidget extends SnackBar {
     );
   }
 
+  /// Returns a copy of this [GlueSnackBarWidget] with a new animation.
+  ///
+  /// This method is typically used internally by the [ScaffoldMessengerState]
+  /// to provide the animation controller to the SnackBar.
   @override
   GlueSnackBarWidget withAnimation(
     Animation<double> newAnimation, {
@@ -108,6 +152,7 @@ class _GlueSnackBarWidgetState extends State<GlueSnackBarWidget> {
   @override
   void initState() {
     super.initState();
+    // Listen for animation status changes to trigger onVisible.
     widget.animation!.addStatusListener(_onAnimationStatusChanged);
     _setAnimations();
   }
@@ -115,6 +160,7 @@ class _GlueSnackBarWidgetState extends State<GlueSnackBarWidget> {
   @override
   void didUpdateWidget(GlueSnackBarWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
+    // If the animation changes, update listeners and animations.
     if (widget.animation != oldWidget.animation) {
       oldWidget.animation!.removeStatusListener(_onAnimationStatusChanged);
       widget.animation!.addStatusListener(_onAnimationStatusChanged);
@@ -123,6 +169,7 @@ class _GlueSnackBarWidgetState extends State<GlueSnackBarWidget> {
     }
   }
 
+  /// Sets up the curved animations based on the provided animation controller.
   void _setAnimations() {
     assert(widget.animation != null);
     _heightAnimation = CurvedAnimation(
@@ -149,6 +196,7 @@ class _GlueSnackBarWidgetState extends State<GlueSnackBarWidget> {
     );
   }
 
+  /// Disposes the curved animations.
   void _disposeAnimations() {
     _heightAnimation?.dispose();
     _fadeInAnimation?.dispose();
@@ -164,11 +212,16 @@ class _GlueSnackBarWidgetState extends State<GlueSnackBarWidget> {
 
   @override
   void dispose() {
+    // Remove animation status listener and dispose animations.
     widget.animation!.removeStatusListener(_onAnimationStatusChanged);
     _disposeAnimations();
     super.dispose();
   }
 
+  /// Handles changes in the animation status.
+  ///
+  /// Triggers the [onVisible] callback when the animation completes for the
+  /// first time.
   void _onAnimationStatusChanged(AnimationStatus animationStatus) {
     if (animationStatus.isCompleted) {
       if (widget.onVisible != null && !_wasVisible) {
@@ -191,6 +244,7 @@ class _GlueSnackBarWidgetState extends State<GlueSnackBarWidget> {
     final bool isThemeDark = theme.brightness == Brightness.dark;
     final Color buttonColor =
         isThemeDark ? colorScheme.primary : colorScheme.secondary;
+    // Determine default theme data based on Material 2 or Material 3.
     final SnackBarThemeData defaults =
         theme.useMaterial3
             ? _SnackBarDefaultsM3(context)
@@ -199,6 +253,7 @@ class _GlueSnackBarWidgetState extends State<GlueSnackBarWidget> {
     final Brightness brightness =
         isThemeDark ? Brightness.light : Brightness.dark;
 
+    // Create an effective theme for the SnackBar content.
     final ThemeData effectiveTheme =
         theme.useMaterial3
             ? theme
@@ -246,6 +301,7 @@ class _GlueSnackBarWidgetState extends State<GlueSnackBarWidget> {
             horizontalPadding) /
         12.0;
 
+    // Create the close icon button if showCloseIcon is true.
     final IconButton? iconButton =
         showCloseIcon
             ? IconButton(
@@ -264,6 +320,7 @@ class _GlueSnackBarWidgetState extends State<GlueSnackBarWidget> {
             )
             : null;
 
+    // Calculate the width needed for the action and close icon.
     final TextPainter actionTextPainter = TextPainter(
       text: TextSpan(
         text: widget.action?.label ?? '',
@@ -293,9 +350,11 @@ class _GlueSnackBarWidgetState extends State<GlueSnackBarWidget> {
         snackBarTheme.actionOverflowThreshold ??
         defaults.actionOverflowThreshold!;
 
+    // Determine if the action and icon will cause overflow.
     final bool willOverflowAction =
         actionAndIconWidth / snackBarWidth > actionOverflowThreshold;
 
+    // Widgets for the action and close icon.
     final List<Widget> maybeActionAndIcon = <Widget>[
       if (widget.action != null)
         Padding(
@@ -317,6 +376,7 @@ class _GlueSnackBarWidgetState extends State<GlueSnackBarWidget> {
         ),
     ];
 
+    // Arrange the SnackBar content, action, and icon.
     Widget snackBar = Padding(
       padding: padding,
       child: Wrap(
@@ -337,10 +397,13 @@ class _GlueSnackBarWidgetState extends State<GlueSnackBarWidget> {
                   ),
                 ),
               ),
+              // Place action and icon in the row if no overflow.
               if (!willOverflowAction) ...maybeActionAndIcon,
+              // Add space if overflow is expected.
               if (willOverflowAction) SizedBox(width: snackBarWidth * 0.4),
             ],
           ),
+          // Place action and icon on a new line if overflow.
           if (willOverflowAction)
             Padding(
               padding: const EdgeInsets.only(
@@ -355,6 +418,7 @@ class _GlueSnackBarWidgetState extends State<GlueSnackBarWidget> {
       ),
     );
 
+    // Center the SnackBar content if it's not floating.
     if (!isFloatingSnackBar) {
       snackBar = Center(child: snackBar);
     }
@@ -369,15 +433,20 @@ class _GlueSnackBarWidgetState extends State<GlueSnackBarWidget> {
         widget.shape ??
         snackBarTheme.shape ??
         (isFloatingSnackBar ? defaults.shape : null);
-    //todo: final DismissDirection dismissDirection = widget.dismissDirection ?? snackBarTheme.dismissDirection ?? DismissDirection.down;
+    //todo: final DismissDirection dismissDirection = widget.dismissDirection ?? snackBarTheme.dismissDirection ?? DismissDirection.down; // Commented out in original code
 
+    // Wrap the SnackBar in Material for styling and elevation.
     snackBar = Material(
       shape: shape,
       elevation: elevation,
-      color: backgroundColor.withValues(alpha: elevation / 10),
+      // Adjust background color alpha based on elevation.
+      color: backgroundColor.withValues(
+        alpha: elevation / 10,
+      ), // This seems unusual for Material design. Typically alpha is not tied to elevation this way.
       clipBehavior: widget.clipBehavior,
       child: Theme(
         data: effectiveTheme,
+        // Apply fade-out animation for M2 fixed Snackbars.
         child:
             accessibleNavigation || theme.useMaterial3
                 ? snackBar
@@ -385,6 +454,7 @@ class _GlueSnackBarWidgetState extends State<GlueSnackBarWidget> {
       ),
     );
 
+    // Apply padding and SafeArea for floating Snackbars.
     if (isFloatingSnackBar) {
       if (width != null) {
         snackBar = Padding(
@@ -397,6 +467,7 @@ class _GlueSnackBarWidgetState extends State<GlueSnackBarWidget> {
       snackBar = SafeArea(top: false, bottom: false, child: snackBar);
     }
 
+    // Wrap in Semantics for accessibility and dismiss behavior.
     snackBar = Padding(
       padding: margin,
       child: Semantics(
@@ -411,6 +482,7 @@ class _GlueSnackBarWidgetState extends State<GlueSnackBarWidget> {
       ),
     );
 
+    // Apply the appropriate transition animation based on theme and behavior.
     final Widget snackBarTransition;
     if (accessibleNavigation) {
       snackBarTransition = snackBar;
@@ -435,9 +507,10 @@ class _GlueSnackBarWidgetState extends State<GlueSnackBarWidget> {
         ),
       );
     } else {
-      snackBarTransition = snackBar;
+      snackBarTransition = snackBar; // Default case for fixed M2
     }
 
+    // Wrap in PopScope and GestureDetector for back press and outside tap dismissal.
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, result) {
@@ -448,9 +521,12 @@ class _GlueSnackBarWidgetState extends State<GlueSnackBarWidget> {
       child: GestureDetector(
         onTap: widget.dismissOnTapOutside ? widget.hideCallback : null,
         child: Hero(
-          tag: '<SnackBar Hero tag - ${widget.content}>',
+          // Wrap in Hero for potential hero animations (though less common for Snackbars).
+          tag:
+              '<SnackBar Hero tag - ${widget.content}>', // Unique tag for Hero animation.
           transitionOnUserGestures: true,
           child: ClipRect(
+            // Clip the content to prevent overflow during animation.
             clipBehavior: widget.clipBehavior,
             child: snackBarTransition,
           ),
@@ -460,6 +536,7 @@ class _GlueSnackBarWidgetState extends State<GlueSnackBarWidget> {
   }
 }
 
+/// Default [SnackBarThemeData] for Material 2.
 class _SnackBarDefaultsM2 extends SnackBarThemeData {
   _SnackBarDefaultsM2(BuildContext context)
     : _theme = Theme.of(context),
@@ -518,6 +595,7 @@ class _SnackBarDefaultsM2 extends SnackBarThemeData {
   double get actionOverflowThreshold => 0.25;
 }
 
+/// Default [SnackBarThemeData] for Material 3.
 class _SnackBarDefaultsM3 extends SnackBarThemeData {
   _SnackBarDefaultsM3(this.context);
 

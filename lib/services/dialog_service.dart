@@ -5,7 +5,17 @@ import 'package:glue_ui/widgets/widgets.dart';
 import 'package:sm_dialog/sm_dialog.dart';
 import 'package:flutter/material.dart';
 
+/// A service class to display and manage a stack of custom dialogs using [SnackBar].
+///
+/// This service leverages a [GlobalKey<ScaffoldMessengerState>] to display
+/// dialogs as [SnackBar] widgets, effectively creating a layered dialog
+/// experience. It maintains a stack of active dialogs and provides methods
+/// to show, hide, and manage them.
 class DialogService {
+  /// Creates a [DialogService].
+  ///
+  /// Requires a [GlobalKey<ScaffoldMessengerState>] and a [BuildContext]
+  /// to manage the display of dialogs as SnackBars.
   DialogService({
     required GlobalKey<ScaffoldMessengerState> smKey,
     required BuildContext context,
@@ -17,8 +27,21 @@ class DialogService {
 
   final List<_DialogEntry> _dialogsStack = [];
 
+  /// Checks if there are any active dialogs in the stack.
   bool get isActive => _dialogsStack.isNotEmpty;
 
+  /// Displays a custom dialog.
+  ///
+  /// The dialog is shown as a [SnackBar] at the bottom of the screen.
+  ///
+  /// Optionally takes a [title], [desc] (description), and [type] of dialog.
+  /// The [type] influences the appearance of the dialog.
+  ///
+  /// Returns a [Future] that resolves with a [UniqueKey] identifying the displayed dialog.
+  /// This key can be used to hide the specific dialog later.
+  ///
+  /// If an error occurs during the process (e.g., [ScaffoldMessengerState] is null),
+  /// a [CustomException] is thrown.
   Future<UniqueKey> show({
     String title = 'Error',
     String? desc,
@@ -44,7 +67,7 @@ class DialogService {
                   dialog: SMDialog(
                     context: _context,
                     dialogType: type,
-                    // alignment: Alignment.bottomCenter,
+                    alignment: Alignment.center,
                     animType: AnimType.bottomSlide,
                     width: double.infinity,
                     transitionAnimationDuration: Duration(milliseconds: 200),
@@ -73,6 +96,14 @@ class DialogService {
     }
   }
 
+  /// Hides a specific dialog or the most recently shown dialog.
+  ///
+  /// If a [key] is provided, the dialog with that specific key is hidden.
+  /// If no [key] is provided, the dialog at the top of the stack (the most recent)
+  /// is hidden.
+  ///
+  /// Throws a [CustomException] if the provided key is not found in the stack
+  /// or if there's an error during the hiding process.
   void hide([UniqueKey? key]) {
     try {
       if (isActive) {
@@ -101,6 +132,11 @@ class DialogService {
     }
   }
 
+  /// Hides all active dialogs in the stack.
+  ///
+  /// Clears the dialogs stack and closes all associated SnackBars.
+  ///
+  /// Throws a [CustomException] if an error occurs during the process.
   void hideAll() {
     try {
       for (_DialogEntry element in _dialogsStack) {
@@ -118,6 +154,10 @@ class DialogService {
   }
 }
 
+/// A private helper class to store information about an active dialog.
+///
+/// Contains the [ScaffoldFeatureController] for the SnackBar and a [UniqueKey]
+/// to identify the dialog in the stack.
 class _DialogEntry {
   final ScaffoldFeatureController<SnackBar, SnackBarClosedReason>? controller;
   final UniqueKey key;

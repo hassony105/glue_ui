@@ -1,10 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:glue_ui/services/services.dart';
+// Export the DialogType enum from the sm_dialog package for convenience.
 export 'package:sm_dialog/sm_dialog.dart' show DialogType;
 
+/// A singleton class to initialize and access the services provided by the GlueUI library.
+///
+/// This class provides a centralized point of access to the [IndicatorService]
+/// and [DialogService], which are essential for displaying indicators and
+/// dialogs within the application. It requires initialization with a
+/// [BuildContext] and a [GlobalKey<ScaffoldMessengerState>] to function correctly.
 class GlueUI {
+  /// Private constructor to prevent external instantiation.
   GlueUI._();
 
+  /// Initializes the [GlueUI] singleton with the necessary context and keys.
+  ///
+  /// This method must be called before accessing the [indicator] or [dialog]
+  /// services.
+  ///
+  /// - [context]: The [BuildContext] from which the services will operate.
+  /// - [smKey]: The [GlobalKey<ScaffoldMessengerState>] used by the services
+  ///   to display SnackBars (for indicators and dialogs).
+  /// - [indicatorWidget]: An optional custom widget to be used as the indicator.
+  ///   If not provided, a default indicator will be used.
+  /// - [logoImage]: An optional image to display within the indicator.
   void initialize({
     required BuildContext context,
     required GlobalKey<ScaffoldMessengerState> smKey,
@@ -22,8 +41,12 @@ class GlueUI {
   Widget? _indicatorWidget;
   ImageProvider? _logoImage;
 
+  /// The singleton instance of [GlueUI].
   static GlueUI instance = GlueUI._();
 
+  /// Provides access to the [IndicatorService] for displaying loading indicators.
+  ///
+  /// This service is initialized upon first access after [initialize] has been called.
   late IndicatorService indicator = IndicatorService(
     context: _context,
     smKey: _smKey,
@@ -31,5 +54,8 @@ class GlueUI {
     logoImage: _logoImage,
   );
 
+  /// Provides access to the [DialogService] for displaying custom dialogs.
+  ///
+  /// This service is initialized upon first access after [initialize] has been called.
   late DialogService dialog = DialogService(smKey: _smKey, context: _context);
 }
