@@ -1,6 +1,6 @@
 # example
 
-A new Flutter project.
+An Example Flutter project for GlueUI package.
 
 ## Getting Started
 
