@@ -32,13 +32,13 @@ class GlueUI {
     ImageProvider? logoImage,
     String? errorMessage,
   }) {
-    if(isInitialized) return;
+    if (isInitialized) return;
     try {
       _context = context;
       _smKey = smKey;
       _indicatorWidget = indicatorWidget;
       _logoImage = logoImage;
-    } catch(e, s){
+    } catch (e, s) {
       throw CustomException(message: errorMessage, hiddenMessage: '$e\n$s');
     }
   }
@@ -47,6 +47,7 @@ class GlueUI {
   late GlobalKey<ScaffoldMessengerState> _smKey;
   Widget? _indicatorWidget;
   ImageProvider? _logoImage;
+
   /// A flag indicating whether the [GlueUI] instance has been successfully
   /// initialized by calling the [initialize] method.
   ///
