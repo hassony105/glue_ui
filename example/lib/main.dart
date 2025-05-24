@@ -41,6 +41,7 @@ class _MyHomePageState extends State<MyHomePage> {
       context: navigatorKey.currentContext!,
       smKey: scaffoldMessengerStateKey,
       logoImage: AssetImage('assets/glue-ui-logo.png'),
+      errorMessage: 'Failed to initialize GlueUI.',
     );
     super.initState();
   }

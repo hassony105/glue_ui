@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:glue_ui/services/services.dart';
+
 // Export the DialogType enum from the sm_dialog package for convenience.
 export 'package:sm_dialog/sm_dialog.dart' show DialogType;
 
@@ -29,17 +30,30 @@ class GlueUI {
     required GlobalKey<ScaffoldMessengerState> smKey,
     Widget? indicatorWidget,
     ImageProvider? logoImage,
+    String? errorMessage,
   }) {
-    _context = context;
-    _smKey = smKey;
-    _indicatorWidget = indicatorWidget;
-    _logoImage = logoImage;
+    if(isInitialized) return;
+    try {
+      _context = context;
+      _smKey = smKey;
+      _indicatorWidget = indicatorWidget;
+      _logoImage = logoImage;
+    } catch(e, s){
+      throw CustomException(message: errorMessage, hiddenMessage: '$e\n$s');
+    }
   }
 
   late BuildContext _context;
   late GlobalKey<ScaffoldMessengerState> _smKey;
   Widget? _indicatorWidget;
   ImageProvider? _logoImage;
+  /// A flag indicating whether the [GlueUI] instance has been successfully
+  /// initialized by calling the [initialize] method.
+  ///
+  /// Accessing services like [indicator] or [dialog] before `isInitialized`
+  /// is `true` will likely result in runtime errors because the necessary
+  /// context and keys will not have been set.
+  bool isInitialized = false;
 
   /// The singleton instance of [GlueUI].
   static GlueUI instance = GlueUI._();
