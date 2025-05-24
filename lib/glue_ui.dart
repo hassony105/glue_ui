@@ -30,7 +30,8 @@ class GlueUI {
     required GlobalKey<ScaffoldMessengerState> smKey,
     Widget? indicatorWidget,
     ImageProvider? logoImage,
-    String? errorMessage,
+    String? errorMessage =
+        'An error occurred during initializing some feature.',
   }) {
     if (isInitialized) return;
     try {
@@ -38,6 +39,8 @@ class GlueUI {
       _smKey = smKey;
       _indicatorWidget = indicatorWidget;
       _logoImage = logoImage;
+      _isInitialized = true;
+      _errorMessage = errorMessage;
     } catch (e, s) {
       throw CustomException(message: errorMessage, hiddenMessage: '$e\n$s');
     }
@@ -47,6 +50,8 @@ class GlueUI {
   late GlobalKey<ScaffoldMessengerState> _smKey;
   Widget? _indicatorWidget;
   ImageProvider? _logoImage;
+  String? _errorMessage;
+  bool _isInitialized = false;
 
   /// A flag indicating whether the [GlueUI] instance has been successfully
   /// initialized by calling the [initialize] method.
@@ -54,7 +59,7 @@ class GlueUI {
   /// Accessing services like [indicator] or [dialog] before `isInitialized`
   /// is `true` will likely result in runtime errors because the necessary
   /// context and keys will not have been set.
-  bool isInitialized = false;
+  bool get isInitialized => _isInitialized;
 
   /// The singleton instance of [GlueUI].
   static GlueUI instance = GlueUI._();
@@ -62,15 +67,29 @@ class GlueUI {
   /// Provides access to the [IndicatorService] for displaying loading indicators.
   ///
   /// This service is initialized upon first access after [initialize] has been called.
-  late IndicatorService indicator = IndicatorService(
-    context: _context,
-    smKey: _smKey,
-    indicatorWidget: _indicatorWidget,
-    logoImage: _logoImage,
-  );
+  late IndicatorService indicator =
+      isInitialized
+          ? IndicatorService(
+            context: _context,
+            smKey: _smKey,
+            indicatorWidget: _indicatorWidget,
+            logoImage: _logoImage,
+          )
+          : throw CustomException(
+            message: _errorMessage,
+            hiddenMessage:
+                'Attempted to access IndicatorService before GlueUI was initialized.',
+          );
 
   /// Provides access to the [DialogService] for displaying custom dialogs.
   ///
   /// This service is initialized upon first access after [initialize] has been called.
-  late DialogService dialog = DialogService(smKey: _smKey, context: _context);
+  late DialogService dialog =
+      isInitialized
+          ? DialogService(smKey: _smKey, context: _context)
+          : throw CustomException(
+            message: _errorMessage,
+            hiddenMessage:
+                'Attempted to access DialogService before GlueUI was initialized.',
+          );
 }

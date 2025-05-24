@@ -1,6 +1,6 @@
 name: glue_ui
 description: "GlueUI is Flutter package responsible handling dialogs and indicators"
-version: 0.0.2
+version: 0.0.3
 homepage: https://github.com/hassony105/glue_ui
 
 environment:
