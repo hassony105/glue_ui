@@ -86,8 +86,9 @@ class IndicatorService {
       _indicatorController?.close();
       _indicatorController = null;
     } catch (e, s) {
+      _indicatorController = null;
       _smKey.currentState?.clearSnackBars();
-      throw CustomException(message: 'حصل خطأ في احدى الميزات', hiddenMessage: 'e: $e\ns: $s');
+      // throw CustomException(message: 'حصل خطأ في احدى الميزات', hiddenMessage: 'e: $e\ns: $s');
     }
   }
 }
