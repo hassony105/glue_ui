@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:glue_ui/extensions/extensions.dart';
+import 'package:glue_ui/services/services.dart';
 import 'package:glue_ui/widgets/widgets.dart';
 
 /// A service class to display and manage a custom indicator using a [SnackBar].
@@ -84,8 +85,9 @@ class IndicatorService {
     try {
       _indicatorController?.close();
       _indicatorController = null;
-    } catch (e) {
+    } catch (e, s) {
       _smKey.currentState?.clearSnackBars();
+      throw CustomException(message: 'حصل خطأ في احدى الميزات', hiddenMessage: 'e: $e\ns: $s');
     }
   }
 }
