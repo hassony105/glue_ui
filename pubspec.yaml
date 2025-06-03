@@ -11,7 +11,10 @@ dependencies:
   flutter:
     sdk: flutter
 
-  sm_dialog: ^3.2.3
+  sm_dialog:
+    git:
+      url: https://github.com/hassony105/sm_dialog.git
+      ref: bf1454c1c41cd34bad8cd7de3ec8dfca6bc613f7
 
 dev_dependencies:
   flutter_test:

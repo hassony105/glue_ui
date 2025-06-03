@@ -1,4 +1,6 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:glue_ui/extensions/extensions.dart';
 import 'package:glue_ui/widgets/widgets.dart';
 
@@ -25,11 +27,9 @@ class IndicatorService {
   /// is provided.
   IndicatorService({
     required BuildContext context,
-    required GlobalKey<ScaffoldMessengerState> smKey,
     Widget? indicatorWidget,
     ImageProvider? logoImage,
   }) : _context = context,
-       _smKey = smKey,
        _indicatorWidget = indicatorWidget,
        _logoImage = logoImage,
        assert(
@@ -38,15 +38,21 @@ class IndicatorService {
        );
 
   /// Checks if the indicator is currently active (visible).
-  bool get isActive => _indicatorController != null;
+  bool get isActive => _overlayEntry != null;
 
   final BuildContext _context;
-  final GlobalKey<ScaffoldMessengerState> _smKey;
   final Widget? _indicatorWidget;
   final ImageProvider? _logoImage;
+  OverlayEntry? _overlayEntry;
+  late OverlayState _overlayState;
 
-  ScaffoldFeatureController<SnackBar, SnackBarClosedReason>?
-  _indicatorController;
+  void initialize() {
+    final overlay = Overlay.maybeOf(_context, rootOverlay: true);
+    if (overlay == null) {
+      throw FlutterError('Could not find OverlayState from navigator context.');
+    }
+    _overlayState = overlay;
+  }
 
   /// Displays the indicator.
   ///
@@ -56,23 +62,24 @@ class IndicatorService {
     FocusScope.of(_context).unfocus();
     hide();
     double indicatorSize = _context.screenSize.shortestSide * .25;
-    _indicatorController = _smKey.currentState?.showSnackBar(
-      GlueSnackBarWidget(
-        key: ValueKey('indicator-service'),
-        hideCallback: hide,
-        dismissOnBack: true,
-        dismissOnTapOutside: false,
-        content: Center(
-          child:
-              _indicatorWidget ??
-              AnimatedIndicatorWidget(size: indicatorSize, image: _logoImage),
-        ),
-        behavior: SnackBarBehavior.fixed,
-        backgroundColor: Colors.black,
-        elevation: 2.5,
-        margin: EdgeInsets.zero,
-      ),
-    );
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      if (Overlay.maybeOf(_context) != null) {
+        _overlayEntry = OverlayEntry(
+          builder: (_) {
+            return Container(
+                height: _context.screenSize.height,
+                width: _context.screenSize.width,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                    color: Colors.black.withValues(alpha: .5),
+                ),
+              child: _indicatorWidget ?? AnimatedIndicatorWidget(size: indicatorSize, image: _logoImage),
+            );
+          },
+        );
+        _overlayState.insert(_overlayEntry!);
+      }
+    });
   }
 
   /// Hides the currently active indicator.
@@ -82,10 +89,13 @@ class IndicatorService {
   /// [ScaffoldMessengerState].
   void hide() {
     try {
-      _indicatorController?.close();
-      _indicatorController = null;
-    } catch (e) {
-      _smKey.currentState?.clearSnackBars();
+      _overlayEntry?.remove();
+      _overlayEntry?.dispose();
+      _overlayEntry = null;
+    } catch (e, s) {
+      if (kDebugMode) {
+        print('e:$e\ns:$s');
+      }
     }
   }
 }
