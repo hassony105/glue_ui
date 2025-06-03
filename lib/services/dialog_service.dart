@@ -26,7 +26,7 @@ class DialogService {
   /// Checks if there are any active dialogs in the stack.
   bool get isActive => _dialogsStack.isNotEmpty;
   void initialize(){
-    final overlay = Overlay.maybeOf(context, rootOverlay: true);
+    final overlay = GlueUI.instance.navigatorKey.currentState?.overlay;
     if (overlay == null) {
       throw FlutterError('Could not find OverlayState from navigator context.');
     }
@@ -56,7 +56,7 @@ class DialogService {
       FocusScope.of(context).unfocus();
       UniqueKey key = UniqueKey();
       SchedulerBinding.instance.addPostFrameCallback((_) {
-        if (Overlay.maybeOf(context) != null) {
+        if (GlueUI.instance.navigatorKey.currentState?.overlay != null) {
           OverlayEntry overlayEntry = OverlayEntry(
             builder: (_) {
               return GestureDetector(

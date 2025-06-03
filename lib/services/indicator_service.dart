@@ -46,7 +46,7 @@ class IndicatorService {
   late OverlayState _overlayState;
 
   void initialize() {
-    final overlay = Overlay.maybeOf(context, rootOverlay: true);
+    OverlayState? overlay = GlueUI.instance.navigatorKey.currentState?.overlay;
     if (overlay == null) {
       throw FlutterError('Could not find OverlayState from navigator context.');
     }
@@ -64,7 +64,7 @@ class IndicatorService {
     hide();
     double indicatorSize = context.screenSize.shortestSide * .25;
     SchedulerBinding.instance.addPostFrameCallback((_) {
-      if (Overlay.maybeOf(context) != null) {
+      if (GlueUI.instance.navigatorKey.currentState?.overlay != null) {
         _overlayEntry = OverlayEntry(
           builder: (_) {
             return Container(
