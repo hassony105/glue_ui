@@ -36,21 +36,23 @@ class GlueUI {
     if (isInitialized) return;
     try {
       _context = context;
-      _smKey = smKey;
       _indicatorWidget = indicatorWidget;
       _logoImage = logoImage;
+      _indicator = IndicatorService(
+        context: context,
+        indicatorWidget: _indicatorWidget,
+        logoImage: _logoImage,
+      )..initialize();
+      _dialog = DialogService(context: _context)..initialize();
       _isInitialized = true;
-      _errorMessage = errorMessage;
     } catch (e, s) {
       throw CustomException(message: errorMessage, hiddenMessage: '$e\n$s');
     }
   }
 
   late BuildContext _context;
-  late GlobalKey<ScaffoldMessengerState> _smKey;
   Widget? _indicatorWidget;
   ImageProvider? _logoImage;
-  String? _errorMessage;
   bool _isInitialized = false;
 
   /// A flag indicating whether the [GlueUI] instance has been successfully
@@ -67,29 +69,12 @@ class GlueUI {
   /// Provides access to the [IndicatorService] for displaying loading indicators.
   ///
   /// This service is initialized upon first access after [initialize] has been called.
-  late IndicatorService indicator =
-      isInitialized
-          ? IndicatorService(
-            context: _context,
-            smKey: _smKey,
-            indicatorWidget: _indicatorWidget,
-            logoImage: _logoImage,
-          )
-          : throw CustomException(
-            message: _errorMessage,
-            hiddenMessage:
-                'Attempted to access IndicatorService before GlueUI was initialized.',
-          );
+  late IndicatorService _indicator;
+  IndicatorService get indicator => _indicator;
 
   /// Provides access to the [DialogService] for displaying custom dialogs.
   ///
   /// This service is initialized upon first access after [initialize] has been called.
-  late DialogService dialog =
-      isInitialized
-          ? DialogService(smKey: _smKey, context: _context)
-          : throw CustomException(
-            message: _errorMessage,
-            hiddenMessage:
-                'Attempted to access DialogService before GlueUI was initialized.',
-          );
+  late DialogService _dialog;
+  DialogService get dialog => _dialog;
 }

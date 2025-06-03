@@ -37,11 +37,20 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
-    GlueUI.instance.initialize(
-      context: navigatorKey.currentContext!,
-      smKey: scaffoldMessengerStateKey,
-      logoImage: AssetImage('assets/glue-ui-logo.png'),
-      errorMessage: 'Failed to initialize GlueUI.',
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      try {
+        GlueUI.instance.initialize(
+          context: context,
+          smKey: scaffoldMessengerStateKey,
+          logoImage: AssetImage('assets/glue-ui-logo.png'),
+          errorMessage: 'Failed to initialize GlueUI.',
+        );
+      } catch (e){
+        if (kDebugMode) {
+          print(e);
+        }
+      }
+      },
     );
     super.initState();
   }

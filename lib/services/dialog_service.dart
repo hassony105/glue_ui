@@ -1,4 +1,4 @@
-import 'package:flutter/foundation.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:glue_ui/extensions/extensions.dart';
 import 'package:glue_ui/services/services.dart';
 import 'package:glue_ui/widgets/widgets.dart';
@@ -17,19 +17,24 @@ class DialogService {
   /// Requires a [GlobalKey<ScaffoldMessengerState>] and a [BuildContext]
   /// to manage the display of dialogs as SnackBars.
   DialogService({
-    required GlobalKey<ScaffoldMessengerState> smKey,
     required BuildContext context,
-  }) : _smKey = smKey,
-       _context = context;
+  }) : _context = context;
 
   final BuildContext _context;
-  final GlobalKey<ScaffoldMessengerState> _smKey;
 
+  late OverlayState _overlayState;
   final List<_DialogEntry> _dialogsStack = [];
 
   /// Checks if there are any active dialogs in the stack.
   bool get isActive => _dialogsStack.isNotEmpty;
+  void initialize(){
+    final overlay = Overlay.maybeOf(_context, rootOverlay: true);
+    if (overlay == null) {
+      throw FlutterError('Could not find OverlayState from navigator context.');
+    }
 
+    _overlayState = overlay;
+  }
   /// Displays a custom dialog.
   ///
   /// The dialog is shown as a [SnackBar] at the bottom of the screen.
@@ -50,43 +55,44 @@ class DialogService {
     try {
       FocusScope.of(_context).unfocus();
       UniqueKey key = UniqueKey();
-      ScaffoldFeatureController<SnackBar, SnackBarClosedReason>? controller =
-          _smKey.currentState?.showSnackBar(
-            GlueSnackBarWidget(
-              key: key,
-              dismissOnBack: true,
-              dismissOnTapOutside: true,
-              margin: EdgeInsets.zero,
-              hideCallback: () => hide(key),
-              backgroundColor: Colors.black,
-              elevation: 5,
-              content: SizedBox(
-                height: _context.screenSize.height,
-                width: _context.screenSize.width,
-                child: AnimatedDialogWidget(
-                  dialog: SMDialog(
-                    context: _context,
-                    dialogType: type,
-                    alignment: Alignment.center,
-                    animType: AnimType.bottomSlide,
-                    width: double.infinity,
-                    transitionAnimationDuration: Duration(milliseconds: 200),
-                    buttonsBorderRadius: BorderRadius.circular(10),
-                    dismissOnTouchOutside: false,
-                    dismissOnBackKeyPress: false,
-                    headerAnimationLoop: false,
-                    title: title,
-                    desc: desc,
-                    showCloseIcon: true,
-                    onClose: () => hide(key),
+      SchedulerBinding.instance.addPostFrameCallback((_) {
+        if (Overlay.maybeOf(_context) != null) {
+          OverlayEntry overlayEntry = OverlayEntry(
+            builder: (_) {
+              return GestureDetector(
+                onTap: () => hide(key),
+                child: Container(
+                  height: _context.screenSize.height,
+                  width: _context.screenSize.width,
+                  decoration: BoxDecoration(
+                    color: Colors.black.withValues(alpha: .5),
+                  ),
+                  child: AnimatedDialogWidget(
+                    dialog: SMDialog(
+                      context: _context,
+                      dialogType: type,
+                      alignment: Alignment.center,
+                      animType: AnimType.bottomSlide,
+                      width: double.infinity,
+                      transitionAnimationDuration: Duration(milliseconds: 200),
+                      buttonsBorderRadius: BorderRadius.circular(10),
+                      dismissOnTouchOutside: false,
+                      dismissOnBackKeyPress: false,
+                      headerAnimationLoop: false,
+                      title: title,
+                      desc: desc,
+                      showCloseIcon: true,
+                      onClose: () => hide(key),
+                    ),
                   ),
                 ),
-              ),
-            ),
+              );
+            },
           );
-      _dialogsStack.add(_DialogEntry(controller, key));
-      SnackBarClosedReason? reason = await controller?.closed;
-      if (kDebugMode) print(reason);
+          _overlayState.insert(overlayEntry);
+      _dialogsStack.add(_DialogEntry(overlayEntry, key));
+        }
+      });
       return key;
     } catch (e, s) {
       throw CustomException(
@@ -115,12 +121,13 @@ class DialogService {
                       () =>
                           throw CustomException(
                             message:
-                                'حصل خطأ في احدى الميزات, رمز الخطأ [SKM-404]',
+                                'حصل خطأ في احدى الميزات, رمز الخطأ [SKM-404]'
                           ),
                 )
                 : _dialogsStack.last;
         _dialogsStack.remove(entry);
-        entry.controller?.close();
+        entry.overlayEntry?.remove();
+        entry.overlayEntry?.dispose();
       }
     } on CustomException {
       rethrow;
@@ -140,7 +147,8 @@ class DialogService {
   void hideAll() {
     try {
       for (_DialogEntry element in _dialogsStack) {
-        element.controller?.close();
+        element.overlayEntry?.remove();
+        element.overlayEntry?.dispose();
       }
       _dialogsStack.clear();
     } on CustomException {
@@ -159,8 +167,8 @@ class DialogService {
 /// Contains the [ScaffoldFeatureController] for the SnackBar and a [UniqueKey]
 /// to identify the dialog in the stack.
 class _DialogEntry {
-  final ScaffoldFeatureController<SnackBar, SnackBarClosedReason>? controller;
+  final OverlayEntry? overlayEntry;
   final UniqueKey key;
 
-  _DialogEntry(this.controller, this.key);
+  _DialogEntry(this.overlayEntry, this.key);
 }
