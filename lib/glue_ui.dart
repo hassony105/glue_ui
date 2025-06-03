@@ -4,6 +4,7 @@ import 'package:glue_ui/services/services.dart';
 // Export the DialogType enum from the sm_dialog package for convenience.
 export 'package:sm_dialog/sm_dialog.dart' show DialogType;
 export 'package:glue_ui/widgets/glue_scaffold.dart';
+
 /// A singleton class to initialize and access the services provided by the GlueUI library.
 ///
 /// This class provides a centralized point of access to the [IndicatorService]
@@ -25,32 +26,19 @@ class GlueUI {
   /// - [indicatorWidget]: An optional custom widget to be used as the indicator.
   ///   If not provided, a default indicator will be used.
   /// - [logoImage]: An optional image to display within the indicator.
-  void initialize({
-    required BuildContext context,
-    required GlobalKey<ScaffoldMessengerState> smKey,
-    Widget? indicatorWidget,
-    ImageProvider? logoImage,
-    String? errorMessage =
-        'An error occurred during initializing some feature.',
-  }) {
+  void initialize({required BuildContext context, required GlobalKey<NavigatorState> nsKey, Widget? indicatorWidget, ImageProvider? logoImage, String? errorMessage = 'An error occurred during initializing some feature.'}) {
     if (isInitialized) return;
     try {
-      _context = context;
       _indicatorWidget = indicatorWidget;
       _logoImage = logoImage;
-      _indicator = IndicatorService(
-        context: context,
-        indicatorWidget: _indicatorWidget,
-        logoImage: _logoImage,
-      )..initialize();
-      _dialog = DialogService(context: _context)..initialize();
+      _indicator = IndicatorService(context: context, indicatorWidget: _indicatorWidget, logoImage: _logoImage, nsKey: nsKey)..initialize();
+      _dialog = DialogService(context: context, nsKey: nsKey)..initialize();
       _isInitialized = true;
     } catch (e, s) {
       throw CustomException(message: errorMessage, hiddenMessage: '$e\n$s');
     }
   }
 
-  late BuildContext _context;
   Widget? _indicatorWidget;
   ImageProvider? _logoImage;
   bool _isInitialized = false;
@@ -70,11 +58,13 @@ class GlueUI {
   ///
   /// This service is initialized upon first access after [initialize] has been called.
   late IndicatorService _indicator;
+
   IndicatorService get indicator => _indicator;
 
   /// Provides access to the [DialogService] for displaying custom dialogs.
   ///
   /// This service is initialized upon first access after [initialize] has been called.
   late DialogService _dialog;
+
   DialogService get dialog => _dialog;
 }

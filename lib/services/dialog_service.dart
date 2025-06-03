@@ -18,10 +18,11 @@ class DialogService {
   /// to manage the display of dialogs as SnackBars.
   DialogService({
     required BuildContext context,
-  }) : _context = context;
+    required GlobalKey<NavigatorState> nsKey,
+  }) : _context = context, _nsKey = nsKey;
 
   final BuildContext _context;
-
+  final GlobalKey<NavigatorState> _nsKey;
   late OverlayState _overlayState;
   final List<_DialogEntry> _dialogsStack = [];
 
@@ -53,7 +54,7 @@ class DialogService {
     DialogType type = DialogType.error,
   }) async {
     try {
-      FocusScope.of(_context).unfocus();
+      FocusScope.of(_nsKey.currentContext!).unfocus();
       UniqueKey key = UniqueKey();
       SchedulerBinding.instance.addPostFrameCallback((_) {
         if (Overlay.maybeOf(_context) != null) {

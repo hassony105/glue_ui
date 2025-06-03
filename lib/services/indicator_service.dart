@@ -28,11 +28,13 @@ class IndicatorService {
   /// is provided.
   IndicatorService({
     required BuildContext context,
+    required GlobalKey<NavigatorState> nsKey,
     Widget? indicatorWidget,
     ImageProvider? logoImage,
   }) : _context = context,
        _indicatorWidget = indicatorWidget,
        _logoImage = logoImage,
+  _nsKey = nsKey,
        assert(
          indicatorWidget != null || logoImage != null,
          'indicatorWidget or logoImage should be provided',
@@ -40,7 +42,7 @@ class IndicatorService {
 
   /// Checks if the indicator is currently active (visible).
   bool get isActive => _overlayEntry != null;
-
+  final GlobalKey<NavigatorState> _nsKey;
   final BuildContext _context;
   final Widget? _indicatorWidget;
   final ImageProvider? _logoImage;
@@ -60,7 +62,7 @@ class IndicatorService {
   /// If an indicator is already active, it will be hidden before showing the new one.
   /// It also unFocuses any active input fields.
   void show() {
-    FocusScope.of(_context).unfocus();
+    FocusScope.of(_nsKey.currentContext!).unfocus();
     hide();
     double indicatorSize = _context.screenSize.shortestSide * .25;
     SchedulerBinding.instance.addPostFrameCallback((_) {
