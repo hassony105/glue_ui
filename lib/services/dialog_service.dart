@@ -29,7 +29,7 @@ class DialogService {
   /// Checks if there are any active dialogs in the stack.
   bool get isActive => _dialogsStack.isNotEmpty;
   void initialize(){
-    final overlay = Overlay.maybeOf(context, rootOverlay: true);
+    final overlay = Overlay.maybeOf(_context, rootOverlay: true);
     if (overlay == null) {
       throw FlutterError('Could not find OverlayState from navigator context.');
     }
@@ -59,7 +59,7 @@ class DialogService {
       FocusScope.of(_nsKey.currentContext!).unfocus();
       UniqueKey key = UniqueKey();
       SchedulerBinding.instance.addPostFrameCallback((_) {
-        if (Overlay.maybeOf(context) != null) {
+        if (Overlay.maybeOf(_context) != null) {
           OverlayEntry overlayEntry = OverlayEntry(
             builder: (_) {
               return GestureDetector(

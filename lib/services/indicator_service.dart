@@ -50,7 +50,7 @@ class IndicatorService {
   late OverlayState _overlayState;
 
   void initialize() {
-    final overlay = Overlay.maybeOf(context, rootOverlay: true);
+    final overlay = Overlay.maybeOf(_context, rootOverlay: true);
     if (overlay == null) {
       throw FlutterError('Could not find OverlayState from navigator context.');
     }
@@ -68,7 +68,7 @@ class IndicatorService {
     hide();
     double indicatorSize = context.screenSize.shortestSide * .25;
     SchedulerBinding.instance.addPostFrameCallback((_) {
-      if (Overlay.maybeOf(_nsKey.currentContext!) != null) {
+      if (Overlay.maybeOf(_context) != null) {
         _overlayEntry = OverlayEntry(
           builder: (_) {
             return Container(
