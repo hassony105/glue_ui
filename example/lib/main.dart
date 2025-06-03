@@ -19,7 +19,7 @@ class MyApp extends StatelessWidget {
       title: 'Flutter Glue UI Demo',
       theme: ThemeData.dark(useMaterial3: true),
       home: const MyHomePage(title: 'Glue UI'),
-      navigatorKey: navigatorKey,
+      navigatorKey: GlueUI.instance.navigatorKey,
       scaffoldMessengerKey: scaffoldMessengerStateKey,
     );
   }
@@ -40,8 +40,6 @@ class _MyHomePageState extends State<MyHomePage> {
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       try {
         GlueUI.instance.initialize(
-          context: context,
-          nsKey: navigatorKey,
           logoImage: AssetImage('assets/glue-ui-logo.png'),
           errorMessage: 'Failed to initialize GlueUI.',
         );

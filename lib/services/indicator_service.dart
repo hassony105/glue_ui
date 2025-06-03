@@ -5,6 +5,8 @@ import 'package:glue_ui/extensions/extensions.dart';
 import 'package:glue_ui/services/services.dart';
 import 'package:glue_ui/widgets/widgets.dart';
 
+import '../glue_ui.dart';
+
 /// A service class to display and manage a custom indicator using a [SnackBar].
 ///
 /// This service allows showing a persistent indicator, such as a loading spinner
@@ -27,14 +29,10 @@ class IndicatorService {
   /// Throws an assertion error if neither [indicatorWidget] nor [logoImage]
   /// is provided.
   IndicatorService({
-    required BuildContext context,
-    required GlobalKey<NavigatorState> nsKey,
     Widget? indicatorWidget,
     ImageProvider? logoImage,
-  }) : _context = context,
-       _indicatorWidget = indicatorWidget,
+  }) : _indicatorWidget = indicatorWidget,
        _logoImage = logoImage,
-  _nsKey = nsKey,
        assert(
          indicatorWidget != null || logoImage != null,
          'indicatorWidget or logoImage should be provided',
@@ -42,33 +40,31 @@ class IndicatorService {
 
   /// Checks if the indicator is currently active (visible).
   bool get isActive => _overlayEntry != null;
-  final GlobalKey<NavigatorState> _nsKey;
-  final BuildContext _context;
   final Widget? _indicatorWidget;
   final ImageProvider? _logoImage;
   OverlayEntry? _overlayEntry;
   late OverlayState _overlayState;
 
   void initialize() {
-    final overlay = Overlay.maybeOf(_context, rootOverlay: true);
+    final overlay = Overlay.maybeOf(context, rootOverlay: true);
     if (overlay == null) {
       throw FlutterError('Could not find OverlayState from navigator context.');
     }
     _overlayState = overlay;
   }
 
-  BuildContext get context => _nsKey.currentContext!;
+  BuildContext get context => GlueUI.instance.navigatorKey.currentContext!;
 
   /// Displays the indicator.
   ///
   /// If an indicator is already active, it will be hidden before showing the new one.
   /// It also unFocuses any active input fields.
   void show() {
-    FocusScope.of(_nsKey.currentContext!).unfocus();
+    FocusScope.of(context).unfocus();
     hide();
     double indicatorSize = context.screenSize.shortestSide * .25;
     SchedulerBinding.instance.addPostFrameCallback((_) {
-      if (Overlay.maybeOf(_context) != null) {
+      if (Overlay.maybeOf(context) != null) {
         _overlayEntry = OverlayEntry(
           builder: (_) {
             return Container(

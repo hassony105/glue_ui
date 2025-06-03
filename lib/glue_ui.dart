@@ -26,13 +26,13 @@ class GlueUI {
   /// - [indicatorWidget]: An optional custom widget to be used as the indicator.
   ///   If not provided, a default indicator will be used.
   /// - [logoImage]: An optional image to display within the indicator.
-  void initialize({required BuildContext context, required GlobalKey<NavigatorState> nsKey, Widget? indicatorWidget, ImageProvider? logoImage, String? errorMessage = 'An error occurred during initializing some feature.'}) {
+  void initialize({Widget? indicatorWidget, ImageProvider? logoImage, String? errorMessage = 'An error occurred during initializing some feature.'}) {
     if (isInitialized) return;
     try {
       _indicatorWidget = indicatorWidget;
       _logoImage = logoImage;
-      _indicator = IndicatorService(context: context, indicatorWidget: _indicatorWidget, logoImage: _logoImage, nsKey: nsKey)..initialize();
-      _dialog = DialogService(context: context, nsKey: nsKey)..initialize();
+      _indicator = IndicatorService(indicatorWidget: _indicatorWidget, logoImage: _logoImage)..initialize();
+      _dialog = DialogService()..initialize();
       _isInitialized = true;
     } catch (e, s) {
       throw CustomException(message: errorMessage, hiddenMessage: '$e\n$s');
@@ -53,6 +53,11 @@ class GlueUI {
 
   /// The singleton instance of [GlueUI].
   static GlueUI instance = GlueUI._();
+
+  final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
+  GlobalKey<NavigatorState> get navigatorKey => _navigatorKey;
+  BuildContext get _context => navigatorKey.currentContext!;
+
 
   /// Provides access to the [IndicatorService] for displaying loading indicators.
   ///

@@ -5,6 +5,8 @@ import 'package:glue_ui/widgets/widgets.dart';
 import 'package:sm_dialog/sm_dialog.dart';
 import 'package:flutter/material.dart';
 
+import '../glue_ui.dart';
+
 /// A service class to display and manage a stack of custom dialogs using [SnackBar].
 ///
 /// This service leverages a [GlobalKey<ScaffoldMessengerState>] to display
@@ -16,20 +18,15 @@ class DialogService {
   ///
   /// Requires a [GlobalKey<ScaffoldMessengerState>] and a [BuildContext]
   /// to manage the display of dialogs as SnackBars.
-  DialogService({
-    required BuildContext context,
-    required GlobalKey<NavigatorState> nsKey,
-  }) : _context = context, _nsKey = nsKey;
+  DialogService();
 
-  final BuildContext _context;
-  final GlobalKey<NavigatorState> _nsKey;
   late OverlayState _overlayState;
   final List<_DialogEntry> _dialogsStack = [];
 
   /// Checks if there are any active dialogs in the stack.
   bool get isActive => _dialogsStack.isNotEmpty;
   void initialize(){
-    final overlay = Overlay.maybeOf(_context, rootOverlay: true);
+    final overlay = Overlay.maybeOf(context, rootOverlay: true);
     if (overlay == null) {
       throw FlutterError('Could not find OverlayState from navigator context.');
     }
@@ -37,7 +34,7 @@ class DialogService {
     _overlayState = overlay;
   }
 
-  BuildContext get context => _nsKey.currentContext!;
+  BuildContext get context => GlueUI.instance.navigatorKey.currentContext!;
   /// Displays a custom dialog.
   ///
   /// The dialog is shown as a [SnackBar] at the bottom of the screen.
@@ -56,10 +53,10 @@ class DialogService {
     DialogType type = DialogType.error,
   }) async {
     try {
-      FocusScope.of(_nsKey.currentContext!).unfocus();
+      FocusScope.of(context).unfocus();
       UniqueKey key = UniqueKey();
       SchedulerBinding.instance.addPostFrameCallback((_) {
-        if (Overlay.maybeOf(_context) != null) {
+        if (Overlay.maybeOf(context) != null) {
           OverlayEntry overlayEntry = OverlayEntry(
             builder: (_) {
               return GestureDetector(
