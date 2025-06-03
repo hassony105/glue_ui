@@ -29,13 +29,15 @@ class DialogService {
   /// Checks if there are any active dialogs in the stack.
   bool get isActive => _dialogsStack.isNotEmpty;
   void initialize(){
-    final overlay = Overlay.maybeOf(_context, rootOverlay: true);
+    final overlay = Overlay.maybeOf(context, rootOverlay: true);
     if (overlay == null) {
       throw FlutterError('Could not find OverlayState from navigator context.');
     }
 
     _overlayState = overlay;
   }
+
+  BuildContext get context => _nsKey.currentContext!;
   /// Displays a custom dialog.
   ///
   /// The dialog is shown as a [SnackBar] at the bottom of the screen.
@@ -57,20 +59,20 @@ class DialogService {
       FocusScope.of(_nsKey.currentContext!).unfocus();
       UniqueKey key = UniqueKey();
       SchedulerBinding.instance.addPostFrameCallback((_) {
-        if (Overlay.maybeOf(_context) != null) {
+        if (Overlay.maybeOf(context) != null) {
           OverlayEntry overlayEntry = OverlayEntry(
             builder: (_) {
               return GestureDetector(
                 onTap: () => hide(key),
                 child: Container(
-                  height: _context.screenSize.height,
-                  width: _context.screenSize.width,
+                  height: context.screenSize.height,
+                  width: context.screenSize.width,
                   decoration: BoxDecoration(
                     color: Colors.black.withValues(alpha: .5),
                   ),
                   child: AnimatedDialogWidget(
                     dialog: SMDialog(
-                      context: _context,
+                      context: context,
                       dialogType: type,
                       alignment: Alignment.center,
                       animType: AnimType.bottomSlide,

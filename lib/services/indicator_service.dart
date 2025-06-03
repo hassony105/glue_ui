@@ -50,12 +50,14 @@ class IndicatorService {
   late OverlayState _overlayState;
 
   void initialize() {
-    final overlay = Overlay.maybeOf(_context, rootOverlay: true);
+    final overlay = Overlay.maybeOf(context, rootOverlay: true);
     if (overlay == null) {
       throw FlutterError('Could not find OverlayState from navigator context.');
     }
     _overlayState = overlay;
   }
+
+  BuildContext get context => _nsKey.currentContext!;
 
   /// Displays the indicator.
   ///
@@ -64,14 +66,14 @@ class IndicatorService {
   void show() {
     FocusScope.of(_nsKey.currentContext!).unfocus();
     hide();
-    double indicatorSize = _context.screenSize.shortestSide * .25;
+    double indicatorSize = context.screenSize.shortestSide * .25;
     SchedulerBinding.instance.addPostFrameCallback((_) {
-      if (Overlay.maybeOf(_context) != null) {
+      if (Overlay.maybeOf(_nsKey.currentContext!) != null) {
         _overlayEntry = OverlayEntry(
           builder: (_) {
             return Container(
-                height: _context.screenSize.height,
-                width: _context.screenSize.width,
+                height: context.screenSize.height,
+                width: context.screenSize.width,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
                     color: Colors.black.withValues(alpha: .5),
