@@ -3,7 +3,7 @@ import 'package:glue_ui/services/services.dart';
 
 // Export the DialogType enum from the sm_dialog package for convenience.
 export 'package:sm_dialog/sm_dialog.dart' show DialogType;
-
+export 'package:glue_ui/widgets/glue_scaffold.dart';
 /// A singleton class to initialize and access the services provided by the GlueUI library.
 ///
 /// This class provides a centralized point of access to the [IndicatorService]

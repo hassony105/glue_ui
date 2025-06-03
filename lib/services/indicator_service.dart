@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:glue_ui/extensions/extensions.dart';
+import 'package:glue_ui/services/services.dart';
 import 'package:glue_ui/widgets/widgets.dart';
 
 /// A service class to display and manage a custom indicator using a [SnackBar].
