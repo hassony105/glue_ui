@@ -39,10 +39,10 @@ class IndicatorService {
        );
 
   /// Checks if the indicator is currently active (visible).
-  bool get isActive => _overlayEntry != null;
+  bool get isActive => _overlayEntries.any((element) => element != null);
   final Widget? _indicatorWidget;
   final ImageProvider? _logoImage;
-  OverlayEntry? _overlayEntry;
+  final List<OverlayEntry?> _overlayEntries = [];
   late OverlayState _overlayState;
 
   void initialize() {
@@ -65,7 +65,7 @@ class IndicatorService {
     double indicatorSize = context.screenSize.shortestSide * .25;
     SchedulerBinding.instance.addPostFrameCallback((_) {
       if (GlueUI.instance.navigatorKey.currentState?.overlay != null) {
-        _overlayEntry = OverlayEntry(
+        final OverlayEntry overlayEntry = OverlayEntry(
           builder: (_) {
             return Container(
                 height: context.screenSize.height,
@@ -78,7 +78,8 @@ class IndicatorService {
             );
           },
         );
-        _overlayState.insert(_overlayEntry!);
+        _overlayEntries.add(overlayEntry);
+        _overlayState.insert(overlayEntry);
       }
     });
   }
@@ -90,9 +91,12 @@ class IndicatorService {
   /// [ScaffoldMessengerState].
   void hide() {
     try {
-      _overlayEntry?.remove();
-      _overlayEntry?.dispose();
-      _overlayEntry = null;
+      for (var overlayEntry in _overlayEntries) {
+        overlayEntry?.remove();
+        overlayEntry?.dispose();
+        overlayEntry = null;
+      }
+      _overlayEntries.clear();
     } catch (e, s) {
       if (kDebugMode) {
         print('e:$e\ns:$s');
