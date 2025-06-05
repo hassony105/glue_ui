@@ -39,10 +39,10 @@ class IndicatorService {
        );
 
   /// Checks if the indicator is currently active (visible).
-  bool get isActive => _overlayEntries.any((element) => element != null);
+  bool get isActive => _overlayEntry != null;
   final Widget? _indicatorWidget;
   final ImageProvider? _logoImage;
-  final List<OverlayEntry?> _overlayEntries = [];
+  OverlayEntry? _overlayEntry;
   late OverlayState _overlayState;
 
   void initialize({required BuildContext context}) {
@@ -76,9 +76,8 @@ class IndicatorService {
               child: _indicatorWidget ?? AnimatedIndicatorWidget(size: indicatorSize, image: _logoImage),
             );
           },
-          maintainState: true,
         );
-        _overlayEntries.add(overlayEntry);
+        _overlayEntry = overlayEntry;
         hide();
         _overlayState.insert(overlayEntry);
       }
@@ -92,12 +91,9 @@ class IndicatorService {
   /// [ScaffoldMessengerState].
   void hide() {
     try {
-      for (var overlayEntry in _overlayEntries) {
-        overlayEntry?.remove();
-        overlayEntry?.dispose();
-        overlayEntry = null;
-      }
-      _overlayEntries.clear();
+      _overlayEntry?.remove();
+      _overlayEntry?.dispose();
+      _overlayEntry = null;
     } catch (e, s) {
       if (kDebugMode) {
         print('e:$e\ns:$s');
