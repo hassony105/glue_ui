@@ -23,6 +23,15 @@ class GlueAppDelegate extends StatefulWidget {
     required this.child,
   });
 
+  final bool useBackButtonInterceptor = !kIsWeb;
+
+  final bool disableBackButton = true;
+
+  final bool overlayWholeScreen = true;
+
+  final bool closeOnBackButton = false;
+
+
 
   /// The widget of the overlay. This is great if you want to insert your own widget to serve as
   /// an overlay.
@@ -63,6 +72,14 @@ class _GlueAppDelegateState extends State<GlueAppDelegate> {
     super.dispose();
   }
 
+  bool myInterceptor(bool stopDefaultButtonEvent, RouteInfo info) {
+    if (context.loaderOverlay.visible && widget.closeOnBackButton) {
+      context.loaderOverlay.hide();
+    }
+    return widget.disableBackButton;
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return Directionality(
@@ -86,12 +103,12 @@ class _GlueAppDelegateState extends State<GlueAppDelegate> {
               as Widget Function(dynamic progress)?;
               final progress = snapshot.data![cProgress] as dynamic;
               final showOverlay = snapshot.data![cShowOverlay] as bool;
-      
+
               if (!kIsWeb) {
                 if (isLoading) {
-                  BackButtonInterceptor.add((stopDefaultButtonEvent, routeInfo) => true);
+                  BackButtonInterceptor.add(myInterceptor);
                 } else {
-                  BackButtonInterceptor.remove((stopDefaultButtonEvent, routeInfo) => true);
+                  BackButtonInterceptor.remove(myInterceptor);
                 }
               }
       
@@ -133,13 +150,21 @@ class _GlueAppDelegateState extends State<GlueAppDelegate> {
       }) =>
       [
         PopScope(
-          canPop: false,
+          canPop: !widget.disableBackButton,
           child: showOverlay
+              ? widget.overlayWholeScreen
               ? SizedBox.expand(
             child: ColoredBox(
               key: GlueAppDelegate.containerForOverlayColorKey,
-              color: Colors.black.withValues(alpha: .5) ??
-                  GlueAppDelegate.defaultOverlayColor,
+              color: Colors.black.withValues(alpha: .5)
+            ),
+          )
+              : Center(
+            child: SizedBox(
+              child: ColoredBox(
+                key: GlueAppDelegate.containerForOverlayColorKey,
+                color: Colors.black.withValues(alpha: .5),
+              ),
             ),
           )
               : const SizedBox(),
