@@ -57,11 +57,12 @@ class IndicatorService {
   /// If an indicator is already active, it will be hidden before showing the new one.
   /// It also unFocuses any active input fields.
   void show(BuildContext context) {
+    hide();
     FocusScope.of(context).unfocus();
     double indicatorSize = context.screenSize.shortestSide * .25;
     SchedulerBinding.instance.addPostFrameCallback((_) {
       if (Overlay.maybeOf(context) != null) {
-        final OverlayEntry overlayEntry = OverlayEntry(
+        _overlayEntry = OverlayEntry(
           builder: (_) {
             return Container(
                 height: context.screenSize.height,
@@ -74,9 +75,7 @@ class IndicatorService {
             );
           },
         );
-        _overlayEntry = overlayEntry;
-        hide();
-        Overlay.maybeOf(context)?.insert(overlayEntry);
+        Overlay.maybeOf(context)?.insert(_overlayEntry!);
       }
     });
   }
