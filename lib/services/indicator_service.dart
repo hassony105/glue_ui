@@ -61,7 +61,6 @@ class IndicatorService {
   /// It also unFocuses any active input fields.
   void show() {
     FocusScope.of(context).unfocus();
-    hide();
     double indicatorSize = context.screenSize.shortestSide * .25;
     SchedulerBinding.instance.addPostFrameCallback((_) {
       if (GlueUI.instance.navigatorKey.currentState?.overlay != null) {
@@ -77,8 +76,10 @@ class IndicatorService {
               child: _indicatorWidget ?? AnimatedIndicatorWidget(size: indicatorSize, image: _logoImage),
             );
           },
+          maintainState: true,
         );
         _overlayEntries.add(overlayEntry);
+        hide();
         _overlayState.insert(overlayEntry);
       }
     });
