@@ -11,6 +11,7 @@ dependencies:
   flutter:
     sdk: flutter
 
+  back_button_interceptor: ^8.0.4
   sm_dialog:
     git:
       url: https://github.com/hassony105/sm_dialog.git

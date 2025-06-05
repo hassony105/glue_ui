@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:glue_ui/glue_ui.dart';
+import 'package:glue_ui/services/indicator_service.dart';
 
 void main() {
   runApp(const MyApp());
@@ -15,12 +16,14 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Glue UI Demo',
-      theme: ThemeData.dark(useMaterial3: true),
-      home: const MyHomePage(title: 'Glue UI'),
-      navigatorKey: GlueUI.instance.navigatorKey,
-      scaffoldMessengerKey: scaffoldMessengerStateKey,
+    return GlueAppDelegate(
+      child: MaterialApp(
+        title: 'Flutter Glue UI Demo',
+        theme: ThemeData.dark(useMaterial3: true),
+        home: const MyHomePage(title: 'Glue UI'),
+        navigatorKey: GlueUI.instance.navigatorKey,
+        scaffoldMessengerKey: scaffoldMessengerStateKey,
+      ),
     );
   }
 }
@@ -37,20 +40,20 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
-    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      try {
-        GlueUI.instance.initialize(
-          context: context,
-          logoImage: AssetImage('assets/glue-ui-logo.png'),
-          errorMessage: 'Failed to initialize GlueUI.',
-        );
-      } catch (e){
-        if (kDebugMode) {
-          print(e);
-        }
-      }
-      },
-    );
+    // WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+    //   try {
+    //     GlueUI.instance.initialize(
+    //       context: context,
+    //       logoImage: AssetImage('assets/glue-ui-logo.png'),
+    //       errorMessage: 'Failed to initialize GlueUI.',
+    //     );
+    //   } catch (e){
+    //     if (kDebugMode) {
+    //       print(e);
+    //     }
+    //   }
+    //   },
+    // );
     super.initState();
   }
 
@@ -68,7 +71,7 @@ class _MyHomePageState extends State<MyHomePage> {
             ElevatedButton(
               onPressed: () async {
                 try {
-                  GlueUI.instance.indicator.show(context);
+                  context.loaderOverlay.show();
                   //any method
                   await Future.delayed(Duration(seconds: 2));
                 } catch (e) {
@@ -76,7 +79,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     print(e);
                   }
                 } finally {
-                  GlueUI.instance.indicator.hide();
+                  context.loaderOverlay.hide();
                 }
               },
               child: Text('show indicator'),
@@ -84,12 +87,12 @@ class _MyHomePageState extends State<MyHomePage> {
             ElevatedButton(
               onPressed: () async {
                 try {
-                  GlueUI.instance.dialog.show(
-                    context: context,
-                    title: 'Dialog Title',
-                    desc: 'Dialog Description',
-                    type: DialogType.success,
-                  );
+                  // GlueUI.instance.dialog.show(
+                  //   context: context,
+                  //   title: 'Dialog Title',
+                  //   desc: 'Dialog Description',
+                  //   type: DialogType.success,
+                  // );
                   //any method
                   await Future.delayed(Duration(seconds: 2));
                 } catch (e) {
@@ -97,7 +100,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     print(e);
                   }
                 } finally {
-                  GlueUI.instance.dialog.hide();
+                  // GlueUI.instance.dialog.hide();
                 }
               },
               child: Text('show dialog for specific duration'),
@@ -105,12 +108,12 @@ class _MyHomePageState extends State<MyHomePage> {
             ElevatedButton(
               onPressed: () async {
                 try {
-                  GlueUI.instance.dialog.show(
-                    context: context,
-                    title: 'Dialog Title',
-                    desc: 'Dialog Description',
-                    type: DialogType.success,
-                  );
+                  // GlueUI.instance.dialog.show(
+                  //   context: context,
+                  //   title: 'Dialog Title',
+                  //   desc: 'Dialog Description',
+                  //   type: DialogType.success,
+                  // );
                   //any method
                   await Future.delayed(Duration(seconds: 2));
                 } catch (e) {
