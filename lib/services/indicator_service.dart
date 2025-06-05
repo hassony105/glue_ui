@@ -43,14 +43,11 @@ class IndicatorService {
   final Widget? _indicatorWidget;
   final ImageProvider? _logoImage;
   OverlayEntry? _overlayEntry;
-  late OverlayState _overlayState;
-
   void initialize({required BuildContext context}) {
     OverlayState? overlay = Overlay.maybeOf(context);
     if (overlay == null) {
       throw FlutterError('Could not find OverlayState from navigator context.');
     }
-    _overlayState = overlay;
   }
 
   // final BuildContext context;
@@ -79,7 +76,7 @@ class IndicatorService {
         );
         _overlayEntry = overlayEntry;
         hide();
-        _overlayState.insert(overlayEntry);
+        Overlay.maybeOf(context)?.insert(overlayEntry);
       }
     });
   }
