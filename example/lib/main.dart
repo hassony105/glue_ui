@@ -40,6 +40,7 @@ class _MyHomePageState extends State<MyHomePage> {
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       try {
         GlueUI.instance.initialize(
+          context: context,
           logoImage: AssetImage('assets/glue-ui-logo.png'),
           errorMessage: 'Failed to initialize GlueUI.',
         );

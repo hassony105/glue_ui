@@ -5,8 +5,6 @@ import 'package:glue_ui/widgets/widgets.dart';
 import 'package:sm_dialog/sm_dialog.dart';
 import 'package:flutter/material.dart';
 
-import '../glue_ui.dart';
-
 /// A service class to display and manage a stack of custom dialogs using [SnackBar].
 ///
 /// This service leverages a [GlobalKey<ScaffoldMessengerState>] to display
@@ -25,8 +23,8 @@ class DialogService {
 
   /// Checks if there are any active dialogs in the stack.
   bool get isActive => _dialogsStack.isNotEmpty;
-  void initialize(){
-    final overlay = GlueUI.instance.navigatorKey.currentState?.overlay;
+  void initialize({required BuildContext context}){
+    final overlay = Overlay.maybeOf(context);
     if (overlay == null) {
       throw FlutterError('Could not find OverlayState from navigator context.');
     }
@@ -57,7 +55,7 @@ class DialogService {
       FocusScope.of(context).unfocus();
       UniqueKey key = UniqueKey();
       SchedulerBinding.instance.addPostFrameCallback((_) {
-        if (GlueUI.instance.navigatorKey.currentState?.overlay != null) {
+        if (Overlay.maybeOf(context) != null) {
           OverlayEntry overlayEntry = OverlayEntry(
             builder: (_) {
               return GestureDetector(

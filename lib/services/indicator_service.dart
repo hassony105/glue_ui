@@ -5,7 +5,6 @@ import 'package:glue_ui/extensions/extensions.dart';
 import 'package:glue_ui/services/services.dart';
 import 'package:glue_ui/widgets/widgets.dart';
 
-import '../glue_ui.dart';
 
 /// A service class to display and manage a custom indicator using a [SnackBar].
 ///
@@ -46,8 +45,8 @@ class IndicatorService {
   final List<OverlayEntry?> _overlayEntries = [];
   late OverlayState _overlayState;
 
-  void initialize() {
-    OverlayState? overlay = GlueUI.instance.navigatorKey.currentState?.overlay;
+  void initialize({required BuildContext context}) {
+    OverlayState? overlay = Overlay.maybeOf(context);
     if (overlay == null) {
       throw FlutterError('Could not find OverlayState from navigator context.');
     }
@@ -64,7 +63,7 @@ class IndicatorService {
     FocusScope.of(context).unfocus();
     double indicatorSize = context.screenSize.shortestSide * .25;
     SchedulerBinding.instance.addPostFrameCallback((_) {
-      if (GlueUI.instance.navigatorKey.currentState?.overlay != null) {
+      if (Overlay.maybeOf(context) != null) {
         final OverlayEntry overlayEntry = OverlayEntry(
           builder: (_) {
             return Container(
