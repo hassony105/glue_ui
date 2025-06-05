@@ -67,7 +67,7 @@ class _MyHomePageState extends State<MyHomePage> {
             ElevatedButton(
               onPressed: () async {
                 try {
-                  GlueUI.instance.indicator.show();
+                  GlueUI.instance.indicator.show(context);
                   //any method
                   await Future.delayed(Duration(seconds: 2));
                 } catch (e) {
@@ -84,6 +84,7 @@ class _MyHomePageState extends State<MyHomePage> {
               onPressed: () async {
                 try {
                   GlueUI.instance.dialog.show(
+                    context: context,
                     title: 'Dialog Title',
                     desc: 'Dialog Description',
                     type: DialogType.success,
@@ -104,6 +105,7 @@ class _MyHomePageState extends State<MyHomePage> {
               onPressed: () async {
                 try {
                   GlueUI.instance.dialog.show(
+                    context: context,
                     title: 'Dialog Title',
                     desc: 'Dialog Description',
                     type: DialogType.success,

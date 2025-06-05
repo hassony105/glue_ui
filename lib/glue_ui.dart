@@ -31,8 +31,6 @@ class GlueUI {
     try {
       _indicatorWidget = indicatorWidget;
       _logoImage = logoImage;
-      _indicator = IndicatorService(indicatorWidget: _indicatorWidget, logoImage: _logoImage)..initialize();
-      _dialog = DialogService()..initialize();
       _isInitialized = true;
     } catch (e, s) {
       throw CustomException(message: errorMessage, hiddenMessage: '$e\n$s');
@@ -62,14 +60,14 @@ class GlueUI {
   /// Provides access to the [IndicatorService] for displaying loading indicators.
   ///
   /// This service is initialized upon first access after [initialize] has been called.
-  late IndicatorService _indicator;
+  late final IndicatorService _indicator = IndicatorService(indicatorWidget: _indicatorWidget, logoImage: _logoImage)..initialize();
 
   IndicatorService get indicator => _indicator;
 
   /// Provides access to the [DialogService] for displaying custom dialogs.
   ///
   /// This service is initialized upon first access after [initialize] has been called.
-  late DialogService _dialog;
+  final DialogService _dialog = DialogService()..initialize();
 
   DialogService get dialog => _dialog;
 }

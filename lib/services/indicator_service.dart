@@ -29,7 +29,7 @@ class IndicatorService {
   /// Throws an assertion error if neither [indicatorWidget] nor [logoImage]
   /// is provided.
   IndicatorService({
-    required this.context,
+    // required this.context,
     Widget? indicatorWidget,
     ImageProvider? logoImage,
   }) : _indicatorWidget = indicatorWidget,
@@ -54,13 +54,13 @@ class IndicatorService {
     _overlayState = overlay;
   }
 
-  final BuildContext context;
+  // final BuildContext context;
 
   /// Displays the indicator.
   ///
   /// If an indicator is already active, it will be hidden before showing the new one.
   /// It also unFocuses any active input fields.
-  void show() {
+  void show(BuildContext context) {
     FocusScope.of(context).unfocus();
     double indicatorSize = context.screenSize.shortestSide * .25;
     SchedulerBinding.instance.addPostFrameCallback((_) {
