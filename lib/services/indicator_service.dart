@@ -29,6 +29,7 @@ class IndicatorService {
   /// Throws an assertion error if neither [indicatorWidget] nor [logoImage]
   /// is provided.
   IndicatorService({
+    required this.context,
     Widget? indicatorWidget,
     ImageProvider? logoImage,
   }) : _indicatorWidget = indicatorWidget,
@@ -53,7 +54,7 @@ class IndicatorService {
     _overlayState = overlay;
   }
 
-  BuildContext get context => GlueUI.instance.navigatorKey.currentContext!;
+  final BuildContext context;
 
   /// Displays the indicator.
   ///

@@ -18,7 +18,7 @@ class DialogService {
   ///
   /// Requires a [GlobalKey<ScaffoldMessengerState>] and a [BuildContext]
   /// to manage the display of dialogs as SnackBars.
-  DialogService();
+  DialogService({required this.context});
 
   late OverlayState _overlayState;
   final List<_DialogEntry> _dialogsStack = [];
@@ -34,7 +34,7 @@ class DialogService {
     _overlayState = overlay;
   }
 
-  BuildContext get context => GlueUI.instance.navigatorKey.currentContext!;
+  final BuildContext context;
   /// Displays a custom dialog.
   ///
   /// The dialog is shown as a [SnackBar] at the bottom of the screen.
