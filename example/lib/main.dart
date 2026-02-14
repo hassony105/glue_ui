@@ -38,6 +38,24 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+
+  void showIndicator2 () async {
+    try {
+      print('indicator 2 starting');
+      GlueUI.instance.loader?.show();
+      print('indicator 2 started');
+      //any method
+      await Future.delayed(Duration(seconds: 2));
+      print('indicator 2 ending');
+    } catch (e) {
+      if (kDebugMode) {
+        print(e);
+      }
+    } finally {
+      GlueUI.instance.loader?.hide();
+    }
+  }
+
   @override
   void initState() {
     // WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
@@ -71,18 +89,26 @@ class _MyHomePageState extends State<MyHomePage> {
             ElevatedButton(
               onPressed: () async {
                 try {
-                  context.loaderOverlay.show();
+                  GlueUI.instance.loader?.show();
                   //any method
+                  print('before indicator 2');
+                  showIndicator2();
+                  print('after indicator 2');
                   await Future.delayed(Duration(seconds: 2));
+                  print('complete and hiding indicator 1');
                 } catch (e) {
                   if (kDebugMode) {
                     print(e);
                   }
                 } finally {
-                  context.loaderOverlay.hide();
+                  GlueUI.instance.loader?.hide();
                 }
               },
               child: Text('show indicator'),
+            ),
+            ElevatedButton(
+              onPressed: showIndicator2,
+              child: Text('show indicator 2'),
             ),
             ElevatedButton(
               onPressed: () async {
@@ -94,7 +120,11 @@ class _MyHomePageState extends State<MyHomePage> {
                   //   type: DialogType.success,
                   // );
                   //any method
+                  print('before indicator 2');
+                  showIndicator2();
+                  print('after indicator 2');
                   await Future.delayed(Duration(seconds: 2));
+                  print('complete and hiding indicator 1');
                 } catch (e) {
                   if (kDebugMode) {
                     print(e);

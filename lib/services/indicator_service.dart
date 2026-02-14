@@ -1,16 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:glue_ui/glue_ui.dart';
 
-
-
-
-
-///Just a extension to make it cleaner to show or hide the overlay
-extension IndicatorControllerWidgetExtension on BuildContext {
-  IndicatorService get loaderOverlay =>
-      IndicatorService._(IndicatorControllerWidget.of(this));
-}
-
 class IndicatorService {
   late IndicatorControllerWidget _overlayController;
 
@@ -21,7 +11,7 @@ class IndicatorService {
 
   bool get visible => _visible ?? false;
 
-  IndicatorService._(IndicatorControllerWidget? overlayController) {
+  IndicatorService(IndicatorControllerWidget? overlayController) {
     if (overlayController != null) {
       _overlayController = overlayController;
     }

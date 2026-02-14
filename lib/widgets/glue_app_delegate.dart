@@ -1,6 +1,7 @@
 import 'package:back_button_interceptor/back_button_interceptor.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:glue_ui/glue_ui.dart';
 import 'package:glue_ui/services/indicator_service.dart';
 
 import 'controller_widget.dart';
@@ -73,8 +74,8 @@ class _GlueAppDelegateState extends State<GlueAppDelegate> {
   }
 
   bool myInterceptor(bool stopDefaultButtonEvent, RouteInfo info) {
-    if (context.loaderOverlay.visible && widget.closeOnBackButton) {
-      context.loaderOverlay.hide();
+    if ((GlueUI.instance.loader?.visible??false) && widget.closeOnBackButton) {
+      GlueUI.instance.loader?.hide();
     }
     return widget.disableBackButton;
   }
@@ -86,8 +87,8 @@ class _GlueAppDelegateState extends State<GlueAppDelegate> {
       textDirection: Directionality.maybeOf(context) ?? TextDirection.ltr,
       child: IndicatorControllerWidget(
         child: Builder(
-          builder: (innerContext) => StreamBuilder<Map<String, dynamic>>(
-            stream: innerContext.loaderOverlay.overlayController.visibilityStream,
+          builder: (_) => StreamBuilder<Map<String, dynamic>>(
+            stream: GlueUI.instance.loader?.overlayController.visibilityStream,
             initialData: const <String, dynamic>{
               cLoading: false,
               cWidgetBuilder: null,
@@ -95,9 +96,6 @@ class _GlueAppDelegateState extends State<GlueAppDelegate> {
               cShowOverlay: true,
             },
             builder: (_, snapshot) {
-              // ignore: unused_local_variable
-              final visibilityStream =
-                  innerContext.loaderOverlay.overlayController.visibilityStream;
               final isLoading = snapshot.data![cLoading] as bool;
               final widgetOverlayBuilder = snapshot.data![cWidgetBuilder]
               as Widget Function(dynamic progress)?;
@@ -111,7 +109,7 @@ class _GlueAppDelegateState extends State<GlueAppDelegate> {
                   BackButtonInterceptor.remove(myInterceptor);
                 }
               }
-      
+
               return Stack(
                 children: <Widget>[
                   widget.child,
@@ -185,8 +183,8 @@ class _GlueAppDelegateState extends State<GlueAppDelegate> {
 class _OverlayWidgetBuilder extends StatelessWidget {
   const _OverlayWidgetBuilder({
     required this.child,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   final Widget child;
 
