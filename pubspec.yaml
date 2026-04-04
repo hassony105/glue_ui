@@ -1,6 +1,6 @@
 name: glue_ui
 description: "GlueUI is Flutter package responsible handling dialogs and indicators"
-version: 0.0.3
+version: 0.0.4
 homepage: https://github.com/hassony105/glue_ui
 
 environment:
@@ -15,7 +15,7 @@ dependencies:
   sm_dialog:
     git:
       url: https://github.com/hassony105/sm_dialog.git
-      ref: 5304e59e409fc631b7e5385475395fd1c508004d
+      ref: 5d047eaa80e6dadd220ba35c20620851e2815696
 
 dev_dependencies:
   flutter_test:
