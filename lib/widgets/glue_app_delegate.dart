@@ -1,8 +1,8 @@
+import 'dart:async';
 import 'package:back_button_interceptor/back_button_interceptor.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:glue_ui/glue_ui.dart';
-import 'package:glue_ui/services/indicator_service.dart';
 
 import 'controller_widget.dart';
 
@@ -54,19 +54,17 @@ class GlueAppDelegate extends StatefulWidget {
 }
 
 class _GlueAppDelegateState extends State<GlueAppDelegate> {
-  IndicatorControllerWidget? _overlayControllerWidget;
+  late final StreamController<Map<String, dynamic>> _visibilityController;
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    setState(() {
-      _overlayControllerWidget = IndicatorControllerWidget.of(context);
-    });
+  void initState() {
+    super.initState();
+    _visibilityController = StreamController<Map<String, dynamic>>.broadcast();
   }
 
   @override
   void dispose() {
-    _overlayControllerWidget?.dispose();
+    _visibilityController.close();
     if (!kIsWeb) {
       BackButtonInterceptor.remove((stopDefaultButtonEvent, routeInfo) => true);
     }
@@ -86,9 +84,10 @@ class _GlueAppDelegateState extends State<GlueAppDelegate> {
     return Directionality(
       textDirection: Directionality.maybeOf(context) ?? TextDirection.ltr,
       child: IndicatorControllerWidget(
+        visibilityController: _visibilityController,
         child: Builder(
           builder: (_) => StreamBuilder<Map<String, dynamic>>(
-            stream: GlueUI.instance.loader?.overlayController.visibilityStream,
+            stream: _visibilityController.stream,
             initialData: const <String, dynamic>{
               cLoading: false,
               cWidgetBuilder: null,
@@ -183,7 +182,6 @@ class _GlueAppDelegateState extends State<GlueAppDelegate> {
 class _OverlayWidgetBuilder extends StatelessWidget {
   const _OverlayWidgetBuilder({
     required this.child,
-    super.key,
   });
 
   final Widget child;
@@ -202,7 +200,7 @@ class _OverlayWidgetBuilder extends StatelessWidget {
 }
 
 class _DefaultOverlayWidget extends StatelessWidget {
-  const _DefaultOverlayWidget({super.key});
+  const _DefaultOverlayWidget();
 
   @override
   Widget build(BuildContext context) {

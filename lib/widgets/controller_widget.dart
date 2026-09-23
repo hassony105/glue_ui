@@ -4,16 +4,16 @@ import 'package:flutter/cupertino.dart';
 
 ///The inherited widget that guarantees the behavior of the overlay
 class IndicatorControllerWidget extends InheritedWidget {
-  IndicatorControllerWidget({
+  const IndicatorControllerWidget({
     super.key,
     required super.child,
+    required this.visibilityController,
   });
 
   static IndicatorControllerWidget? of(BuildContext context) =>
       context.findAncestorWidgetOfExactType<IndicatorControllerWidget>();
 
-  final StreamController<Map<String, dynamic>> visibilityController =
-  StreamController();
+  final StreamController<Map<String, dynamic>> visibilityController;
 
   Stream<Map<String, dynamic>> get visibilityStream =>
       visibilityController.stream;
@@ -36,5 +36,6 @@ class IndicatorControllerWidget extends InheritedWidget {
   void dispose() => visibilityController.close();
 
   @override
-  bool updateShouldNotify(InheritedWidget oldWidget) => true;
+  bool updateShouldNotify(covariant IndicatorControllerWidget oldWidget) =>
+      visibilityController != oldWidget.visibilityController;
 }

@@ -4,19 +4,13 @@ import 'package:glue_ui/glue_ui.dart';
 import 'package:glue_ui/services/indicator_service.dart';
 
 void main() {
-  runApp(const MyApp());
-}
-
-GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
-GlobalKey<ScaffoldMessengerState> scaffoldMessengerStateKey =
-    GlobalKey<ScaffoldMessengerState>();
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return GlueAppDelegate(
+  runApp(
+    GlueAppDelegate(
+      indicatorWidget: SizedBox(
+        height: 100,
+        width: 100,
+        child: CircularProgressIndicator(color: Colors.red),
+      ),
       child: MaterialApp(
         title: 'Flutter Glue UI Demo',
         theme: ThemeData.dark(useMaterial3: true),
@@ -24,9 +18,21 @@ class MyApp extends StatelessWidget {
         navigatorKey: GlueUI.instance.navigatorKey,
         scaffoldMessengerKey: scaffoldMessengerStateKey,
       ),
-    );
-  }
+    ),
+  );
 }
+
+GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+GlobalKey<ScaffoldMessengerState> scaffoldMessengerStateKey = GlobalKey<ScaffoldMessengerState>();
+
+// class MyApp extends StatelessWidget {
+//   const MyApp({super.key});
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     return
+//   }
+// }
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
@@ -37,9 +43,11 @@ class MyHomePage extends StatefulWidget {
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+extension _IndicatorControllerWidgetExtension on BuildContext {
+}
 
-  void showIndicator2 () async {
+class _MyHomePageState extends State<MyHomePage> {
+  void showIndicator2() async {
     try {
       print('indicator 2 starting');
       GlueUI.instance.loader?.show();
@@ -78,10 +86,7 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text(widget.title),
-      ),
+      appBar: AppBar(backgroundColor: Theme.of(context).colorScheme.inversePrimary, title: Text(widget.title)),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -89,7 +94,9 @@ class _MyHomePageState extends State<MyHomePage> {
             ElevatedButton(
               onPressed: () async {
                 try {
-                  GlueUI.instance.loader?.show();
+                  var loader = IndicatorService(IndicatorControllerWidget.of(context));
+                  print(loader);
+                  loader.show();
                   //any method
                   print('before indicator 2');
                   showIndicator2();
@@ -106,10 +113,7 @@ class _MyHomePageState extends State<MyHomePage> {
               },
               child: Text('show indicator'),
             ),
-            ElevatedButton(
-              onPressed: showIndicator2,
-              child: Text('show indicator 2'),
-            ),
+            ElevatedButton(onPressed: showIndicator2, child: Text('show indicator 2')),
             ElevatedButton(
               onPressed: () async {
                 try {
