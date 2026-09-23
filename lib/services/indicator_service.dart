@@ -1,41 +1,38 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:glue_ui/glue_ui.dart';
+import 'package:glue_ui/models/models.dart';
 
 class IndicatorService {
-  late IndicatorControllerWidget _overlayController;
+  final StreamController<IndicatorState> _visibilityController = StreamController<IndicatorState>.broadcast();
 
-  Widget Function(dynamic progress)? _widgetBuilder;
-  bool? _visible;
+  bool _visible = false;
 
-  IndicatorControllerWidget get overlayController => _overlayController;
+  Stream<IndicatorState> get visibilityStream => _visibilityController.stream;
 
-  bool get visible => _visible ?? false;
+  bool get visible => _visible;
 
-  IndicatorService(IndicatorControllerWidget? overlayController) {
-    if (overlayController != null) {
-      _overlayController = overlayController;
-    }
-  }
+  IndicatorService();
 
   void show({
     Widget Function(dynamic progress)? widgetBuilder,
     dynamic progress,
     bool showOverlay = true,
   }) {
-    _widgetBuilder = widgetBuilder;
     _visible = true;
-    _overlayController.setOverlayVisible(
-      _visible!,
-      widgetBuilder: _widgetBuilder,
+    _visibilityController.add(IndicatorState(
+      isLoading: true,
+      widgetBuilder: widgetBuilder,
       progress: progress,
       showOverlay: showOverlay,
-    );
+    ));
   }
-
-
 
   void hide() {
     _visible = false;
-    _overlayController.setOverlayVisible(_visible!);
+    _visibilityController.add(const IndicatorState(isLoading: false));
+  }
+  
+  void dispose() {
+    _visibilityController.close();
   }
 }

@@ -1,24 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:glue_ui/services/services.dart';
-import 'package:glue_ui/widgets/controller_widget.dart';
-//
-// // Export the DialogType enum from the sm_dialog package for convenience.
-export 'package:sm_dialog/sm_dialog.dart' show DialogType;
-export './widgets/widgets.dart';
+import 'package:glue_ui/models/models.dart';
 
+export 'package:sm_dialog/sm_dialog.dart' show DialogType;
+export 'package:glue_ui/widgets/glue_app_delegate.dart';
+export 'package:glue_ui/widgets/glue_scaffold.dart';
+export 'package:glue_ui/widgets/glue_snack_bar_widget.dart';
+export 'package:glue_ui/models/models.dart';
+export 'package:glue_ui/services/services.dart';
 
 class GlueUI {
-  static GlueUI instance = GlueUI._();
+  static final GlueUI instance = GlueUI._();
 
   GlueUI._();
 
   final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
   GlobalKey<NavigatorState> get navigatorKey => _navigatorKey;
 
-  IndicatorService? get loader => navigatorKey.currentContext?.loader;
+  final IndicatorService _loader = IndicatorService();
+  final DialogService _dialog = DialogService();
+  
+  GlueUIConfig config = const GlueUIConfig();
 
-}
+  IndicatorService get loader => _loader;
+  DialogService get dialog => _dialog;
 
-extension _IndicatorControllerWidgetExtension on BuildContext {
-  IndicatorService get loader => IndicatorService(IndicatorControllerWidget.of(this));
+  void initialize({GlueUIConfig config = const GlueUIConfig()}) {
+    this.config = config;
+  }
 }

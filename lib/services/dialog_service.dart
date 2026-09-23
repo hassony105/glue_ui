@@ -1,50 +1,32 @@
 import 'package:flutter/scheduler.dart';
 import 'package:glue_ui/extensions/extensions.dart';
-import 'package:glue_ui/services/services.dart';
+import 'package:glue_ui/glue_ui.dart';
 import 'package:glue_ui/widgets/widgets.dart';
 import 'package:sm_dialog/sm_dialog.dart';
 import 'package:flutter/material.dart';
 
-/// A service class to display and manage a stack of custom dialogs using [SnackBar].
+/// A service class to display and manage a stack of custom dialogs using [OverlayEntry].
 ///
-/// This service leverages a [GlobalKey<ScaffoldMessengerState>] to display
-/// dialogs as [SnackBar] widgets, effectively creating a layered dialog
-/// experience. It maintains a stack of active dialogs and provides methods
+/// This service leverages the navigator overlay to display
+/// dialogs. It maintains a stack of active dialogs and provides methods
 /// to show, hide, and manage them.
 class DialogService {
-  /// Creates a [DialogService].
-  ///
-  /// Requires a [GlobalKey<ScaffoldMessengerState>] and a [BuildContext]
-  /// to manage the display of dialogs as SnackBars.
   DialogService();
 
-  late OverlayState _overlayState;
   final List<_DialogEntry> _dialogsStack = [];
 
   /// Checks if there are any active dialogs in the stack.
   bool get isActive => _dialogsStack.isNotEmpty;
-  void initialize({required BuildContext context}){
-    final overlay = Overlay.maybeOf(context);
-    if (overlay == null) {
-      throw FlutterError('Could not find OverlayState from navigator context.');
-    }
 
-    _overlayState = overlay;
-  }
-
-  // final BuildContext context;
   /// Displays a custom dialog.
   ///
-  /// The dialog is shown as a [SnackBar] at the bottom of the screen.
+  /// The dialog is shown as an [OverlayEntry] at the center of the screen.
   ///
   /// Optionally takes a [title], [desc] (description), and [type] of dialog.
   /// The [type] influences the appearance of the dialog.
   ///
   /// Returns a [Future] that resolves with a [UniqueKey] identifying the displayed dialog.
   /// This key can be used to hide the specific dialog later.
-  ///
-  /// If an error occurs during the process (e.g., [ScaffoldMessengerState] is null),
-  /// a [CustomException] is thrown.
   Future<UniqueKey> show({
     required BuildContext context,
     String title = 'Error',
@@ -54,61 +36,59 @@ class DialogService {
     try {
       FocusScope.of(context).unfocus();
       UniqueKey key = UniqueKey();
+      
+      final overlayState = GlueUI.instance.navigatorKey.currentState?.overlay ?? Overlay.maybeOf(context);
+      
+      if (overlayState == null) {
+        throw CustomException(message: 'Could not find OverlayState to show dialog.');
+      }
+      
       SchedulerBinding.instance.addPostFrameCallback((_) {
-        if (Overlay.maybeOf(context) != null) {
-          OverlayEntry overlayEntry = OverlayEntry(
-            builder: (_) {
-              return GestureDetector(
-                onTap: () => hide(key),
-                child: Container(
-                  height: context.screenSize.height,
-                  width: context.screenSize.width,
-                  decoration: BoxDecoration(
-                    color: Colors.black.withValues(alpha: .5),
-                  ),
-                  child: AnimatedDialogWidget(
-                    dialog: SMDialog(
-                      context: context,
-                      dialogType: type,
-                      alignment: Alignment.center,
-                      animType: AnimType.bottomSlide,
-                      width: double.infinity,
-                      transitionAnimationDuration: Duration(milliseconds: 200),
-                      buttonsBorderRadius: BorderRadius.circular(10),
-                      dismissOnTouchOutside: false,
-                      dismissOnBackKeyPress: false,
-                      headerAnimationLoop: false,
-                      title: title,
-                      desc: desc,
-                      showCloseIcon: true,
-                      onClose: () => hide(key),
-                    ),
+        OverlayEntry overlayEntry = OverlayEntry(
+          builder: (_) {
+            return GestureDetector(
+              onTap: () => hide(key),
+              child: Container(
+                height: context.screenSize.height,
+                width: context.screenSize.width,
+                decoration: BoxDecoration(
+                  color: Colors.black.withValues(alpha: .5),
+                ),
+                child: AnimatedDialogWidget(
+                  dialog: SMDialog(
+                    context: context,
+                    dialogType: type,
+                    alignment: Alignment.center,
+                    animType: AnimType.bottomSlide,
+                    width: double.infinity,
+                    transitionAnimationDuration: Duration(milliseconds: 200),
+                    buttonsBorderRadius: BorderRadius.circular(10),
+                    dismissOnTouchOutside: false,
+                    dismissOnBackKeyPress: false,
+                    headerAnimationLoop: false,
+                    title: title,
+                    desc: desc,
+                    showCloseIcon: true,
+                    onClose: () => hide(key),
                   ),
                 ),
-              );
-            },
-          );
-          _overlayState.insert(overlayEntry);
-      _dialogsStack.add(_DialogEntry(overlayEntry, key));
-        }
+              ),
+            );
+          },
+        );
+        overlayState.insert(overlayEntry);
+        _dialogsStack.add(_DialogEntry(overlayEntry, key));
       });
       return key;
     } catch (e, s) {
       throw CustomException(
-        message: 'حصل خطأ في احدى الميزات, رمز الخطأ [SMK maybe null]',
+        message: 'An error occurred while showing the dialog.',
         hiddenMessage: '{\ne: $e\ns:$s\n}',
       );
     }
   }
 
   /// Hides a specific dialog or the most recently shown dialog.
-  ///
-  /// If a [key] is provided, the dialog with that specific key is hidden.
-  /// If no [key] is provided, the dialog at the top of the stack (the most recent)
-  /// is hidden.
-  ///
-  /// Throws a [CustomException] if the provided key is not found in the stack
-  /// or if there's an error during the hiding process.
   void hide([UniqueKey? key]) {
     try {
       if (isActive) {
@@ -116,12 +96,9 @@ class DialogService {
             key != null
                 ? _dialogsStack.firstWhere(
                   (element) => element.key == key,
-                  orElse:
-                      () =>
-                          throw CustomException(
-                            message:
-                                'حصل خطأ في احدى الميزات, رمز الخطأ [SKM-404]'
-                          ),
+                  orElse: () => throw CustomException(
+                    message: 'Dialog key not found.',
+                  ),
                 )
                 : _dialogsStack.last;
         _dialogsStack.remove(entry);
@@ -132,17 +109,13 @@ class DialogService {
       rethrow;
     } catch (e, s) {
       throw CustomException(
-        message: 'حصل خطأ في احدى الميزات, رمز الخطأ [SMK-null]',
+        message: 'An error occurred while hiding the dialog.',
         hiddenMessage: '{\ne: $e\ns:$s\n}',
       );
     }
   }
 
   /// Hides all active dialogs in the stack.
-  ///
-  /// Clears the dialogs stack and closes all associated SnackBars.
-  ///
-  /// Throws a [CustomException] if an error occurs during the process.
   void hideAll() {
     try {
       for (_DialogEntry element in _dialogsStack) {
@@ -154,7 +127,7 @@ class DialogService {
       rethrow;
     } catch (e, s) {
       throw CustomException(
-        message: 'حصل خطأ في احدى الميزات, رمز الخطأ [SMK-null]',
+        message: 'An error occurred while hiding all dialogs.',
         hiddenMessage: '{\ne: $e\ns:$s\n}',
       );
     }
@@ -162,9 +135,6 @@ class DialogService {
 }
 
 /// A private helper class to store information about an active dialog.
-///
-/// Contains the [ScaffoldFeatureController] for the SnackBar and a [UniqueKey]
-/// to identify the dialog in the stack.
 class _DialogEntry {
   final OverlayEntry? overlayEntry;
   final UniqueKey key;
