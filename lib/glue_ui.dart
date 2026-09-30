@@ -7,7 +7,7 @@ export 'package:glue_ui/widgets/glue_app_delegate.dart';
 export 'package:glue_ui/widgets/glue_scaffold.dart';
 export 'package:glue_ui/widgets/glue_snack_bar_widget.dart';
 export 'package:glue_ui/models/models.dart';
-export 'package:glue_ui/services/services.dart';
+export 'package:glue_ui/services/services.dart' hide CustomException;
 
 class GlueUI {
   static final GlueUI instance = GlueUI._();

@@ -1,9 +1,11 @@
 import 'package:flutter/scheduler.dart';
 import 'package:glue_ui/extensions/extensions.dart';
-import 'package:glue_ui/glue_ui.dart';
+import 'package:glue_ui/services/services.dart';
 import 'package:glue_ui/widgets/widgets.dart';
 import 'package:sm_dialog/sm_dialog.dart';
 import 'package:flutter/material.dart';
+
+import '../glue_ui.dart';
 
 /// A service class to display and manage a stack of custom dialogs using [OverlayEntry].
 ///
