@@ -1,3 +1,9 @@
+## 0.1.0
+
+* fix indicator not showing first time problem.
+* some improvement and make the dialog service works now
+* update the version
+
 ## 0.0.1
 
 * initial release.
