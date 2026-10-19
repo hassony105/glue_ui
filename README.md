@@ -17,7 +17,7 @@
   <div>
   </div>
   <br/>
-  <p>Glue UI is a package that can trigger an indicator and dialog to show them separately from context of the app. It dynamically overlays widgets on top of the Navigator.</p>
+  <p>Glue UI is a package that can trigger an indicator, a dialog and a snack bar to show them separately from context of the app. It dynamically overlays widgets on top of the Navigator — no <code>BuildContext</code> or <code>Scaffold</code> required.</p>
 </div>
 
 ---
@@ -37,7 +37,7 @@ Add the package to your dependencies:
 
 ```yaml
 dependencies:
-  glue_ui: ^0.1.0
+  glue_ui: ^0.2.0
 ```
 
 <p>OR</p>
@@ -46,7 +46,7 @@ dependencies:
 dependencies:
   glue_ui:
     git: https://github.com/hassony105/glue_ui.git
-    ref: v0.1.0
+    ref: v0.2.0
 ```
 
 Finally, run `dart pub get` to download the package.
@@ -62,13 +62,24 @@ void main() {
   GlueUI.instance.initialize(
     config: GlueUIConfig(
       defaultIndicator: CircularProgressIndicator(),
-      overlayColor: Colors.black.withOpacity(0.5),
+      overlayColor: Colors.black.withValues(alpha: 0.5),
+      // Optional snack bar defaults
+      snackBarDuration: Duration(seconds: 4),
+      snackBarPosition: SnackBarPosition.bottom,
     ),
   );
   
   runApp(const MyApp());
 }
 ```
+
+| `GlueUIConfig` field | Type                   | Default        | Description                                                         |
+|:---------------------|:-----------------------|:---------------|:--------------------------------------------------------------------|
+| `defaultIndicator`   | `Widget?`              | adaptive spinner | Widget shown by `loader.show()`.                                  |
+| `overlayColor`       | `Color?`               | black 50%      | Barrier color behind the indicator.                                 |
+| `snackBarDuration`   | `Duration`             | 4 seconds      | Default time a snack bar stays visible.                             |
+| `snackBarPosition`   | `SnackBarPosition`     | `bottom`       | Default snack bar position (`top` / `bottom`).                      |
+| `snackBarBuilder`    | `GlueSnackBarBuilder?` | `null`         | Replaces the default snack bar look for the whole app.              |
 
 Next, wrap your `MaterialApp` with `GlueAppDelegate` and assign the `navigatorKey`:
 
@@ -105,6 +116,14 @@ class MyApp extends StatelessWidget {
 | `GlueUI.instance.dialog.hide()`      | `void`              | Hides a specific dialog or the most recently shown dialog. If a `key` is provided, the dialog with that specific key is hidden. If no `key` is provided, the dialog at the top of the stack (the most recent) is hidden.                                                                                                                                                                           |
 | `GlueUI.instance.dialog.hideAll()`   | `void`              | Hides all active dialogs in the stack.                                                                                                                                                                                                                                                                                                                                                             |
 | `GlueUI.instance.dialog.isActive`    | `bool`              | Checks if there are any active dialogs in the stack.                                                                                                                                                                                                                                                                                                                                               |
+| `GlueUI.instance.snackBar`           | `SnackBarService`   | Provides access to the `SnackBarService` for displaying snack bars.                                                                                                                                                                                                                                                                                                                                |
+| `GlueUI.instance.snackBar.show()`    | `GlueSnackBarController` | Shows a snack bar, or queues it if one is already visible (one at a time, FIFO — like `ScaffoldMessenger`). Takes a required `message` and optional `title`, `type`, `duration`, `position`, `actionLabel`/`onAction`, `showCloseIcon`, `dismissible`, `onTap`, `builder` and `replace`. No `context` and no `Scaffold` needed.                                                           |
+| `GlueUI.instance.snackBar.hide()`    | `void`              | Hides the visible snack bar. If a `key` is provided, hides that snack bar or removes it from the queue if it hasn't been shown yet.                                                                                                                                                                                                                                                                |
+| `GlueUI.instance.snackBar.hideAll()` | `void`              | Clears the queue and hides the visible snack bar.                                                                                                                                                                                                                                                                                                                                                  |
+| `GlueUI.instance.snackBar.isActive`  | `bool`              | Checks if a snack bar is currently visible.                                                                                                                                                                                                                                                                                                                                                        |
+| `GlueUI.instance.snackBar.queueLength` | `int`             | Number of snack bars waiting in the queue.                                                                                                                                                                                                                                                                                                                                                         |
+| `GlueSnackBarController.closed`      | `Future<SnackBarClosedReason>` | Completes when the snack bar is gone, with the reason: `timeout`, `action`, `dismiss`, `swipe`, `hide` or `remove`.                                                                                                                                                                                                                                                                     |
+| `GlueSnackBarController.close()`     | `void`              | Hides this snack bar (or removes it from the queue).                                                                                                                                                                                                                                                                                                                                               |
 
 ---
 
@@ -132,7 +151,7 @@ ElevatedButton(
     }  
   },  
   child: Text('Show Indicator'),  
-)
+);
 ```
 
 ### Dialog
@@ -160,6 +179,62 @@ ElevatedButton(
   },  
   child: Text('Show dialog for specific duration'),  
 )
+```
+
+### Snack Bar
+
+Snack bars can be shown from anywhere — a button, a repository, a BLoC — without a `BuildContext` and without a `Scaffold`:
+
+```dart
+// Simple
+GlueUI.instance.snackBar.show(
+  title: 'Saved',
+  message: 'Your changes were saved successfully.',
+  type: SnackBarType.success, // normal, success, error, warning, info
+);
+
+// With an action, and waiting for the result
+final controller = GlueUI.instance.snackBar.show(
+  message: 'Item deleted.',
+  type: SnackBarType.error,
+  actionLabel: 'UNDO',
+  onAction: () => restoreItem(),
+  showCloseIcon: true,
+);
+final reason = await controller.closed; // e.g. SnackBarClosedReason.action
+
+// At the top, replacing anything currently visible or queued
+GlueUI.instance.snackBar.show(
+  message: 'You are offline.',
+  type: SnackBarType.warning,
+  position: SnackBarPosition.top,
+  replace: true,
+);
+
+// Close from code
+controller.close();                 // or GlueUI.instance.snackBar.hide(controller.key)
+GlueUI.instance.snackBar.hideAll(); // clear queue + hide visible one
+```
+
+Snack bars are shown **one at a time**; extra calls are queued and shown in order. They can be swiped away horizontally (`dismissible: true` by default), respect the safe area and move above the keyboard.
+
+#### Custom snack bar look
+
+Use `snackBarBuilder` in `GlueUIConfig` (app-wide) or `builder` in `show()` (single call). GlueUI still handles position, animation, swipe and the timer:
+
+```dart
+GlueUIConfig(
+  snackBarBuilder: (context, data) => Card(
+    child: ListTile(
+      title: Text(data.title ?? ''),
+      subtitle: Text(data.message),
+      trailing: data.actionLabel == null
+          ? null
+          : TextButton(onPressed: data.onActionPressed, child: Text(data.actionLabel!)),
+      onLongPress: data.dismiss,
+    ),
+  ),
+);
 ```
 
 ## Platforms

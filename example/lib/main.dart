@@ -21,13 +21,10 @@ void main() {
         theme: ThemeData.dark(useMaterial3: true),
         home: const MyHomePage(title: 'Glue UI'),
         navigatorKey: GlueUI.instance.navigatorKey,
-        scaffoldMessengerKey: scaffoldMessengerStateKey,
       ),
     ),
   );
 }
-
-GlobalKey<ScaffoldMessengerState> scaffoldMessengerStateKey = GlobalKey<ScaffoldMessengerState>();
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
@@ -110,6 +107,53 @@ class _MyHomePageState extends State<MyHomePage> {
                 }
               },
               child: const Text('show dialog for until user dismiss it'),
+            ),
+            const Divider(),
+            ElevatedButton(
+              onPressed: () => GlueUI.instance.snackBar.show(
+                title: 'Saved',
+                message: 'Your changes were saved successfully.',
+                type: SnackBarType.success,
+              ),
+              child: const Text('show success snack bar'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                final controller = GlueUI.instance.snackBar.show(
+                  message: 'Item deleted.',
+                  type: SnackBarType.error,
+                  actionLabel: 'UNDO',
+                  onAction: () => debugPrint('undo pressed'),
+                  showCloseIcon: true,
+                );
+                final reason = await controller.closed;
+                debugPrint('snack bar closed: $reason');
+              },
+              child: const Text('show snack bar with action'),
+            ),
+            ElevatedButton(
+              onPressed: () => GlueUI.instance.snackBar.show(
+                message: 'New version available.',
+                type: SnackBarType.info,
+                position: SnackBarPosition.top,
+              ),
+              child: const Text('show top snack bar'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                for (var i = 1; i <= 3; i++) {
+                  GlueUI.instance.snackBar.show(
+                    message: 'Queued snack bar #$i',
+                    type: SnackBarType.warning,
+                    duration: const Duration(seconds: 2),
+                  );
+                }
+              },
+              child: const Text('queue 3 snack bars'),
+            ),
+            ElevatedButton(
+              onPressed: GlueUI.instance.snackBar.hideAll,
+              child: const Text('hide all snack bars'),
             ),
           ],
         ),
