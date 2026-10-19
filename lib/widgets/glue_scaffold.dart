@@ -24,7 +24,7 @@ const FloatingActionButtonLocation _kDefaultFloatingActionButtonLocation =
 const FloatingActionButtonAnimator _kDefaultFloatingActionButtonAnimator =
     FloatingActionButtonAnimator.scaling;
 
-const Curve _standardBottomSheetCurve = standardEasing;
+const Curve _standardBottomSheetCurve = Easing.legacy;
 // When the top of the BottomSheet crosses this threshold, it will start to
 // shrink the FAB and show a scrim.
 const double _kBottomSheetDominatesPercentage = 0.3;
@@ -2334,7 +2334,7 @@ class GlueScaffoldState extends State<GlueScaffold> with TickerProviderStateMixi
       bottomSheetKey.currentState!.close();
       setState(() {
         _showBodyScrim = false;
-        _bodyScrimColor = Colors.black.withOpacity(0.0);
+        _bodyScrimColor = Colors.black.withValues(alpha: 0.0);
         _currentBottomSheet = null;
       });
 
@@ -2791,12 +2791,12 @@ class GlueScaffoldState extends State<GlueScaffold> with TickerProviderStateMixi
 
   /// Whether to show a [ModalBarrier] over the body of the scaffold.
   void showBodyScrim(bool value, double opacity) {
-    if (_showBodyScrim == value && _bodyScrimColor.opacity == opacity) {
+    if (_showBodyScrim == value && _bodyScrimColor.a == opacity) {
       return;
     }
     setState(() {
       _showBodyScrim = value;
-      _bodyScrimColor = Colors.black.withOpacity(opacity);
+      _bodyScrimColor = Colors.black.withValues(alpha: opacity);
     });
   }
 

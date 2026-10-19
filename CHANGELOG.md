@@ -1,3 +1,7 @@
+## 0.2.1
+
+* fix deprecated color and easing apis
+
 ## 0.2.0
 
 * add global snack bar service `GlueUI.instance.snackBar` (overlay-based, no `BuildContext` or `Scaffold` needed)
